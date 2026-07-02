@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   CityPulse AI — Tailwind v4 Theme Configuration
+   All tokens from skills.md Section 2, mapped to Tailwind custom theme values.
+   This is the SINGLE SOURCE OF TRUTH for the design token system.
+   ============================================================================= */
+
+@theme inline {
+  /* --- Font Families (skills.md §2.2) --- */
+  --font-sans: var(--font-geist-sans), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), "JetBrains Mono", ui-monospace, monospace;
+
+  /* --- Base Surface Colors (skills.md §2.1 — dark mode is primary) --- */
+  --color-cp-bg-base: #0A0E14;
+  --color-cp-bg-surface: #11161F;
+  --color-cp-bg-surface-raised: #171D29;
+  --color-cp-bg-overlay: rgba(10, 14, 20, 0.72);
+
+  /* --- Border Colors --- */
+  --color-cp-border-subtle: #1F2733;
+  --color-cp-border-default: #2A3340;
+  --color-cp-border-strong: #3D4856;
+
+  /* --- Text Colors --- */
+  --color-cp-text-primary: #E8EBF0;
+  --color-cp-text-secondary: #9AA5B5;
+  --color-cp-text-muted: #5C6779;
+  --color-cp-text-inverse: #0A0E14;
+
+  /* --- Brand / Accent Colors --- */
+  --color-cp-accent-primary: #2DD4BF;
+  --color-cp-accent-primary-hover: #5EEAD4;
+  --color-cp-accent-secondary: #6366F1;
+
+  /* --- Semantic Risk/Status Colors --- */
+  --color-cp-risk-low: #34D399;
+  --color-cp-risk-medium: #FBBF24;
+  --color-cp-risk-high: #FB923C;
+  --color-cp-risk-severe: #F87171;
+  --color-cp-risk-low-bg: rgba(52, 211, 153, 0.12);
+  --color-cp-risk-medium-bg: rgba(251, 191, 36, 0.12);
+  --color-cp-risk-high-bg: rgba(251, 146, 60, 0.12);
+  --color-cp-risk-severe-bg: rgba(248, 113, 113, 0.12);
+
+  /* --- Spacing Scale (skills.md §2.3 — 8px base unit) --- */
+  --spacing-cp-1: 4px;
+  --spacing-cp-2: 8px;
+  --spacing-cp-3: 12px;
+  --spacing-cp-4: 16px;
+  --spacing-cp-6: 24px;
+  --spacing-cp-8: 32px;
+  --spacing-cp-12: 48px;
+  --spacing-cp-16: 64px;
+
+  /* --- Border Radius (skills.md §2.4) --- */
+  --radius-cp-sm: 6px;
+  --radius-cp-md: 8px;
+  --radius-cp-lg: 12px;
+  --radius-cp-full: 9999px;
+
+  /* --- Box Shadows (skills.md §2.5) --- */
+  --shadow-cp-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-cp-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-cp-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+
+  /* --- Typography Scale (skills.md §2.2) ---
+       Tailwind v4 font-size custom properties use --text-* naming.
+       Each includes size and line-height. --- */
+  --text-cp-display: 32px;
+  --text-cp-display--line-height: 1.2;
+  --text-cp-h1: 24px;
+  --text-cp-h1--line-height: 1.3;
+  --text-cp-h2: 18px;
+  --text-cp-h2--line-height: 1.4;
+  --text-cp-h3: 15px;
+  --text-cp-h3--line-height: 1.4;
+  --text-cp-body: 14px;
+  --text-cp-body--line-height: 1.6;
+  --text-cp-small: 13px;
+  --text-cp-small--line-height: 1.5;
+  --text-cp-micro: 11px;
+  --text-cp-micro--line-height: 1.4;
+  --text-cp-data-lg: 28px;
+  --text-cp-data-lg--line-height: 1.1;
+  --text-cp-data-md: 18px;
+  --text-cp-data-md--line-height: 1.2;
+  --text-cp-data-sm: 13px;
+  --text-cp-data-sm--line-height: 1.3;
+}
+
+/* =============================================================================
+   CSS Custom Properties (for non-Tailwind contexts & CSS variable references)
+   ============================================================================= */
+
+:root {
+  /* Surface tokens as CSS variables for JS/inline-style access */
+  --cp-bg-base: #0A0E14;
+  --cp-bg-surface: #11161F;
+  --cp-bg-surface-raised: #171D29;
+  --cp-bg-overlay: rgba(10, 14, 20, 0.72);
+
+  --cp-border-subtle: #1F2733;
+  --cp-border-default: #2A3340;
+  --cp-border-strong: #3D4856;
+
+  --cp-text-primary: #E8EBF0;
+  --cp-text-secondary: #9AA5B5;
+  --cp-text-muted: #5C6779;
+  --cp-text-inverse: #0A0E14;
+
+  --cp-accent-primary: #2DD4BF;
+  --cp-accent-primary-hover: #5EEAD4;
+  --cp-accent-secondary: #6366F1;
+
+  --cp-risk-low: #34D399;
+  --cp-risk-medium: #FBBF24;
+  --cp-risk-high: #FB923C;
+  --cp-risk-severe: #F87171;
+  --cp-risk-low-bg: rgba(52, 211, 153, 0.12);
+  --cp-risk-medium-bg: rgba(251, 191, 36, 0.12);
+  --cp-risk-high-bg: rgba(251, 146, 60, 0.12);
+  --cp-risk-severe-bg: rgba(248, 113, 113, 0.12);
+}
+
+/* =============================================================================
+   Base Styles — Dark mode first (skills.md §1.1)
+   ============================================================================= */
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--cp-bg-base);
+  color: var(--cp-text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus ring utility — all interactive elements (skills.md §3.1) */
+*:focus-visible {
+  outline: 2px solid var(--cp-accent-primary);
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling for dark mode */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cp-bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--cp-border-default);
+  border-radius: var(--radius-cp-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cp-border-strong);
+}

@@ -1,0 +1,14 @@
+/*
+ * CityPulse AI — Styles Directory
+ *
+ * The primary global stylesheet lives at src/app/globals.css
+ * (Next.js App Router convention, imported by layout.tsx).
+ *
+ * This directory exists for additional stylesheets needed in future phases:
+ * - Component-specific CSS modules
+ * - Animation keyframe libraries
+ * - Chart/visualization styles
+ *
+ * All styles must use CityPulse design tokens from globals.css @theme block.
+ * See docs/skills.md Section 2 for the complete token reference.
+ */
