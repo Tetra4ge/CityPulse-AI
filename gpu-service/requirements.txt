@@ -6,6 +6,7 @@
 # cuml-cu12
 # fastapi
 # uvicorn
+# numpy
 # pandas
 # scikit-learn (CPU baseline for benchmark comparison)
-# numpy
+
