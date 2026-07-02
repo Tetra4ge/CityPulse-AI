@@ -1,0 +1,11 @@
+# CityPulse AI — GPU Service Dependencies
+# Pinned versions will be added in Phase 2 when this service is implemented.
+#
+# Expected dependencies:
+# cudf-cu12
+# cuml-cu12
+# fastapi
+# uvicorn
+# pandas
+# scikit-learn (CPU baseline for benchmark comparison)
+# numpy
