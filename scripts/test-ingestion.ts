@@ -43,10 +43,10 @@ async function runTests() {
   const complaints = await queryComplaintsHistory("Zone-A");
   console.log(`   Found ${complaints.length} simulated complaints for Zone-A in history.`);
   if (complaints.length > 0) {
-    console.log("   Sample complaint: ", complaints[0].payload.raw_text);
-    console.log("   Sample severity: ", complaints[0].payload.severity);
-    console.log("   Sample category: ", complaints[0].payload.category);
-    console.log("   Sample is_simulated: ", complaints[0].payload.is_simulated);
+    console.log("   Sample complaint: ", (complaints[0].payload as any).raw_text);
+    console.log("   Sample severity: ", (complaints[0].payload as any).severity);
+    console.log("   Sample category: ", (complaints[0].payload as any).category);
+    console.log("   Sample is_simulated: ", (complaints[0].payload as any).is_simulated);
   }
 
   console.log("\n4. Testing Ingestion Failure / Degraded Path Fallback...");
