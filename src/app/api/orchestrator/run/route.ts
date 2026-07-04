@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runPipeline } from "@/lib/orchestrator";
+import crypto from "crypto";
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,10 +8,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const zone = searchParams.get("zone") || "Delhi";
 
-    console.log(`[API] Triggering LangGraph orchestrator for zone: ${zone}`);
+    // Generate a unique Thread ID for the LangGraph checkpointer
+    const threadId = crypto.randomUUID();
+
+    console.log(`[API] Triggering LangGraph orchestrator for zone: ${zone}, thread: ${threadId}`);
     
     // Invoke the entire Multi-Agent LangGraph flow
-    const finalState = await runPipeline(zone);
+    const finalState = await runPipeline(zone, threadId);
 
     return NextResponse.json({
       success: true,

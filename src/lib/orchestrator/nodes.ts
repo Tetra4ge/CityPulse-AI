@@ -62,10 +62,11 @@ export async function decisionNode(state: CityPulseState): Promise<Partial<CityP
   const decisionResult = await decide(state.forecastResult, state.triageResult, state.zone);
   
   // Save to the database so the Approval Queue can pick it up.
-  const decisionId = await insertDecision(decisionResult);
+  // We pass in state.decisionId to ensure the database ID perfectly matches the LangGraph thread_id
+  const dbId = await insertDecision(decisionResult, state.decisionId);
   
-  // Attach the generated ID so the reflection node can link its review to this record
-  const resultWithId = { ...decisionResult, id: decisionId };
+  // Attach the ID so the reflection node can link its review to this record
+  const resultWithId = { ...decisionResult, id: dbId };
 
   return {
     decisionResult: resultWithId as DecisionOutput

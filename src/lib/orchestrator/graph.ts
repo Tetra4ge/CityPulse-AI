@@ -1,4 +1,4 @@
-import { StateGraph, START, END } from "@langchain/langgraph";
+import { StateGraph, START, END, MemorySaver } from "@langchain/langgraph";
 import { CityPulseStateAnnotation } from "./state";
 import { 
   ingestNode, 
@@ -25,6 +25,12 @@ const workflow = new StateGraph(CityPulseStateAnnotation)
   .addEdge("decision", "reflection")
   .addEdge("reflection", END);
 
-// 4. Compile the graph into an executable application
-export const appGraph = workflow.compile();
+// 4. Initialize Checkpointer for Human-in-the-Loop state persistence
+const memory = new MemorySaver();
+
+// 5. Compile the graph into an executable application, pausing before reflection
+export const appGraph = workflow.compile({
+  checkpointer: memory,
+  interruptBefore: ["reflection"]
+});
 

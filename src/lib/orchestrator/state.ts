@@ -16,6 +16,7 @@ import type {
  */
 export const CityPulseStateAnnotation = Annotation.Root({
   zone: Annotation<string>,
+  decisionId: Annotation<string>,
   ingestionResult: Annotation<IngestionOutput | null>({
     default: () => null,
     reducer: (oldState, newState) => newState ?? oldState

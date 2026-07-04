@@ -631,8 +631,8 @@ export async function insertForecast(
   return id;
 }
 
-export async function insertDecision(record: DecisionOutput): Promise<string> {
-  const id = crypto.randomUUID();
+export async function insertDecision(record: DecisionOutput, providedId?: string): Promise<string> {
+  const id = providedId || crypto.randomUUID();
   if (isGcpEnabled && bq) {
     await insertBqRow("decisions", {
       id,

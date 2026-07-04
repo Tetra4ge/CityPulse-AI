@@ -18,13 +18,17 @@ import { CityPulseState } from "./orchestrator/state";
  * Triggers the entire CityPulse Multi-Agent pipeline via LangGraph.
  * 
  * @param zone The target zone (e.g., "Zone-A", "Delhi")
+ * @param threadId The unique ID for the graph execution thread
  * @returns The final state of the graph after all agents have run
  */
-export async function runPipeline(zone: string): Promise<CityPulseState> {
-  console.log(`[Orchestrator] Starting LangGraph pipeline for zone: ${zone}`);
+export async function runPipeline(zone: string, threadId: string): Promise<CityPulseState> {
+  console.log(`[Orchestrator] Starting LangGraph pipeline for zone: ${zone}, thread: ${threadId}`);
   
-  // Invoke the compiled graph with the initial state
-  const finalState = await appGraph.invoke({ zone });
+  // Invoke the compiled graph with the initial state and the checkpointer thread_id
+  const finalState = await appGraph.invoke(
+    { zone, decisionId: threadId },
+    { configurable: { thread_id: threadId } }
+  );
   
   console.log(`[Orchestrator] Pipeline completed for zone: ${zone}`);
   return finalState;

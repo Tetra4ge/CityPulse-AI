@@ -46,6 +46,16 @@ export async function POST(request: NextRequest) {
       confidence: 1.0,
     });
 
+    // RESUME THE LANGGRAPH PIPELINE!
+    // Since we used decision_id as the thread_id, we can resume the exact paused thread.
+    // The graph was interrupted before "reflection". Passing null continues execution.
+    const { appGraph } = await import("@/lib/orchestrator/graph");
+    console.log(`[API] Resuming LangGraph thread: ${decision_id}`);
+    
+    // We execute it asynchronously so we don't block the UI response
+    appGraph.invoke(null, { configurable: { thread_id: decision_id } })
+      .catch(err => console.error(`[API] Failed to resume graph ${decision_id}:`, err));
+
     const response: ApprovalResponse = {
       decision_id,
       approval_status: status,
