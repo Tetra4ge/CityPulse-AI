@@ -11,13 +11,31 @@ export function HistoricalTrends() {
   const [data, setData] = useState<TrendData[]>([]);
 
   useEffect(() => {
-    // Generate some mock historical data to show the trend since we don't have historical polling set up in the frontend yet.
-    // In production, this would hit `/api/ingestion/history` or similar.
-    const mockData: TrendData[] = Array.from({ length: 24 }).map((_, i) => ({
-      timestamp: new Date(Date.now() - (23 - i) * 3600000).toISOString(),
-      aqi: 100 + Math.sin(i / 3) * 50 + (i > 18 ? 80 : 0) // Spike towards the end
-    }));
-    setData(mockData);
+    async function fetchHistory() {
+      try {
+        const res = await fetch("/api/ingestion/history?zone=Zone-A");
+        if (res.ok) {
+          const fetchedData = await res.json();
+          if (fetchedData && fetchedData.length > 0) {
+            setData(fetchedData);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch history:", e);
+      }
+      
+      // Fallback if DB is empty so the chart isn't totally blank
+      const mockData: TrendData[] = Array.from({ length: 24 }).map((_, i) => ({
+        timestamp: new Date(Date.now() - (23 - i) * 3600000).toISOString(),
+        aqi: 100 + Math.sin(i / 3) * 50 + (i > 18 ? 80 : 0)
+      }));
+      setData(mockData);
+    }
+    
+    fetchHistory();
+    const interval = setInterval(fetchHistory, 10000); // Poll every 10s
+    return () => clearInterval(interval);
   }, []);
 
   const maxAqi = Math.max(...data.map(d => d.aqi), 300);
