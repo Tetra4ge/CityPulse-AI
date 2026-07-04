@@ -25,12 +25,8 @@ export function HistoricalTrends() {
         console.error("Failed to fetch history:", e);
       }
       
-      // Fallback if DB is empty so the chart isn't totally blank
-      const mockData: TrendData[] = Array.from({ length: 24 }).map((_, i) => ({
-        timestamp: new Date(Date.now() - (23 - i) * 3600000).toISOString(),
-        aqi: 100 + Math.sin(i / 3) * 50 + (i > 18 ? 80 : 0)
-      }));
-      setData(mockData);
+      // Fallback if DB is empty: just set an empty array.
+      setData([]);
     }
     
     fetchHistory();

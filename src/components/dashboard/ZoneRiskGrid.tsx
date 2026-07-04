@@ -33,14 +33,6 @@ export function ZoneRiskGrid() {
           }
         });
 
-        // Add defaults if empty just for the demo
-        if (uniqueZones.size === 0) {
-          uniqueZones.set("Zone-A", { zone: "Zone-A", risk_level: "low", overall_confidence: 0.9 });
-          uniqueZones.set("Zone-B", { zone: "Zone-B", risk_level: "medium", overall_confidence: 0.85 });
-          uniqueZones.set("Zone-C", { zone: "Zone-C", risk_level: "high", overall_confidence: 0.75 });
-          uniqueZones.set("Zone-D", { zone: "Zone-D", risk_level: "severe", overall_confidence: 0.65 });
-        }
-
         setZones(Array.from(uniqueZones.values()));
       } catch (e) {
         console.error(e);
