@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import type { TimelineEntry } from "@/lib/types/agent-schemas";
 
-export function AgentTimeline() {
+export function AgentTimeline({ zone }: { zone: string }) {
   const [events, setEvents] = useState<TimelineEntry[]>([]);
 
   useEffect(() => {
     async function fetchTimeline() {
       try {
-        const res = await fetch("/api/timeline?limit=15");
+        const res = await fetch(`/api/timeline?zone=${zone}&limit=15`);
         if (res.ok) {
           const data = await res.json();
           setEvents(data);
@@ -22,7 +22,7 @@ export function AgentTimeline() {
     fetchTimeline();
     const interval = setInterval(fetchTimeline, 5000); // Poll every 5s for the demo
     return () => clearInterval(interval);
-  }, []);
+  }, [zone]);
 
   return (
     <div className="bg-cp-bg-surface border border-cp-border-subtle p-cp-4 h-full flex flex-col font-mono text-sm overflow-hidden">

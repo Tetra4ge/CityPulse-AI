@@ -7,13 +7,13 @@ type TrendData = {
   aqi: number;
 };
 
-export function HistoricalTrends() {
+export function HistoricalTrends({ zone }: { zone: string }) {
   const [data, setData] = useState<TrendData[]>([]);
 
   useEffect(() => {
     async function fetchHistory() {
       try {
-        const res = await fetch("/api/ingestion/history?zone=Zone-A");
+        const res = await fetch(`/api/ingestion/history?zone=${zone}`);
         if (res.ok) {
           const fetchedData = await res.json();
           if (fetchedData && fetchedData.length > 0) {
@@ -32,7 +32,7 @@ export function HistoricalTrends() {
     fetchHistory();
     const interval = setInterval(fetchHistory, 10000); // Poll every 10s
     return () => clearInterval(interval);
-  }, []);
+  }, [zone]);
 
   const maxAqi = Math.max(...data.map(d => d.aqi), 300);
 

@@ -3,9 +3,8 @@
 import { useState } from "react";
 import type { WhatIfResult } from "@/lib/types/agent-schemas";
 
-export function WhatIfSimulation() {
+export function WhatIfSimulation({ zone }: { zone: string }) {
   const [multiplier, setMultiplier] = useState<number>(1.0);
-  const [zone, setZone] = useState<string>("Zone-A");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<WhatIfResult | null>(null);
 
@@ -34,18 +33,9 @@ export function WhatIfSimulation() {
       <h2 className="text-cp-text-primary font-bold mb-cp-4 uppercase tracking-widest text-xs border-b border-cp-border-subtle pb-2">What-If Simulation (GPU)</h2>
       
       <div className="mb-6 space-y-4">
-        <div>
-          <label className="block text-cp-text-secondary text-xs mb-1">Target Zone</label>
-          <select 
-            className="w-full bg-cp-bg-base border border-cp-border-subtle text-cp-text-primary p-2 text-xs outline-none focus:border-cp-text-secondary"
-            value={zone}
-            onChange={(e) => setZone(e.target.value)}
-          >
-            <option value="Zone-A">Zone-A</option>
-            <option value="Zone-B">Zone-B</option>
-            <option value="Zone-C">Zone-C</option>
-            <option value="Zone-D">Zone-D</option>
-          </select>
+        <div className="flex justify-between items-center bg-cp-bg-base border border-cp-border-subtle p-2">
+          <span className="text-cp-text-secondary text-xs">Target Zone</span>
+          <span className="text-cp-text-primary font-bold">{zone}</span>
         </div>
 
         <div>
