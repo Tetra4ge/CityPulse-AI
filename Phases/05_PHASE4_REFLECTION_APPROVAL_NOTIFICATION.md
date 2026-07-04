@@ -59,12 +59,12 @@ Implementation approach: the Notification Agent's dispatch function/endpoint sho
 - 1 person: Notification Agent
 
 ## Deliverables checklist
-- [ ] Reflection Agent runs all four checks, writes to `reflections`
-- [ ] Approval UI shows decision + reflection flags paired together
-- [ ] Notification dispatch is structurally blocked (fails, not just declines) if `approval_status !== 'approved'`
-- [ ] Approval/rejection logged to `agent_decisions_log` with reviewer ID + timestamp
-- [ ] Notification Agent formats correct per-audience messages, writes to `notifications_log`
-- [ ] All Part A/B/C endpoints wired and returning real (non-mock) data
+- [x] Reflection Agent runs all four checks, writes to `reflections`
+- [x] Approval UI shows decision + reflection flags paired together
+- [x] Notification dispatch is structurally blocked (fails, not just declines) if `approval_status !== 'approved'`
+- [x] Approval/rejection logged to `agent_decisions_log` with reviewer ID + timestamp
+- [x] Notification Agent formats correct per-audience messages, writes to `notifications_log`
+- [x] All Part A/B/C endpoints wired and returning real (non-mock) data
 
 ## Milestone check (hour 32)
 Full happy-path loop works end to end with real (not mocked) agents: ingest → forecast/triage → decision → reflection → human approves → notification dispatches and appears in the log. This matches `04_ARCHITECTURE.md` §3 steps 1–8 exactly — walk through each step manually and confirm it against that list.

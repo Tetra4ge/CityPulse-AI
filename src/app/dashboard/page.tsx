@@ -5,6 +5,7 @@ import { ZoneRiskGrid } from "@/components/dashboard/ZoneRiskGrid";
 import { HistoricalTrends } from "@/components/dashboard/HistoricalTrends";
 import { AgentTimeline } from "@/components/dashboard/AgentTimeline";
 import { WhatIfSimulation } from "@/components/dashboard/WhatIfSimulation";
+import { ApprovalQueue } from "@/components/dashboard/ApprovalQueue";
 
 export default function DashboardPage() {
   const [selectedZone, setSelectedZone] = useState("Delhi");
@@ -64,8 +65,11 @@ export default function DashboardPage() {
           </div>
 
           {/* Middle Column: Agent Timeline */}
-          <div className="lg:col-span-4 min-h-0">
-            <AgentTimeline zone={selectedZone} />
+          <div className="lg:col-span-4 min-h-0 flex flex-col gap-cp-4">
+            <ApprovalQueue />
+            <div className="flex-1 min-h-0">
+              <AgentTimeline zone={selectedZone} />
+            </div>
           </div>
 
           {/* Right Column: What-If Simulation */}

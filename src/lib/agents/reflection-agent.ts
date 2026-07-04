@@ -7,12 +7,13 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { insertReflection, insertTimelineEntry } from "../db/bigquery-client";
-import type {
+import {
   DecisionOutput,
   ForecastOutput,
   TriageOutput,
   ReflectionOutput,
 } from "@/lib/types/agent-schemas";
+import { CONFIDENCE_CUTOFF } from "../config/thresholds";
 import crypto from "crypto";
 
 // Initialize Gemini
@@ -22,7 +23,7 @@ if (apiKey) {
   ai = new GoogleGenerativeAI(apiKey);
 }
 
-const CONFIDENCE_THRESHOLD = 0.75;
+// Confidence threshold is now centralized in config/thresholds.ts
 
 /**
  * Perform a fast LLM sanity check to ensure recommendations align with the rationale.
@@ -67,7 +68,7 @@ export async function reflect(
   const flags: string[] = [];
 
   // Check 1: Confidence Threshold
-  if (decision.overall_confidence < CONFIDENCE_THRESHOLD) {
+  if (decision.overall_confidence < CONFIDENCE_CUTOFF) {
     flags.push("low_confidence");
   }
 

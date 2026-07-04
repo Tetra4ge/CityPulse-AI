@@ -10,6 +10,7 @@ import { insertDecision, insertTimelineEntry } from "../db/bigquery-client";
 import { ingestWithRetry } from "./ingestion-agent";
 import { forecast } from "./forecast-agent";
 import { triage } from "./triage-agent";
+import { getEpaForecastTier, CONFLICT_DIVERGENCE_THRESHOLD } from "../config/thresholds";
 import type {
   ForecastOutput,
   TriageOutput,
@@ -31,12 +32,7 @@ if (apiKey) {
 // Risk Tier Mappings
 // -----------------------------------------------------------------------------
 
-function getForecastTier(predictedAqi: number): number {
-  if (predictedAqi <= 50) return 0; // low
-  if (predictedAqi <= 100) return 1; // medium
-  if (predictedAqi <= 150) return 2; // high
-  return 3; // severe
-}
+// Forecast tier mapping has been moved to src/lib/config/thresholds.ts
 
 function getTriageTier(severity: SeveritySignal): number {
   switch (severity) {
@@ -67,9 +63,9 @@ export async function detectConflict(
   forecastOutput: ForecastOutput,
   triageOutput: TriageOutput,
 ): Promise<boolean> {
-  const fTier = getForecastTier(forecastOutput.predicted_aqi);
+  const fTier = getEpaForecastTier(forecastOutput.predicted_aqi);
   const tTier = getTriageTier(triageOutput.severity_signal);
-  return Math.abs(fTier - tTier) > 1;
+  return Math.abs(fTier - tTier) > CONFLICT_DIVERGENCE_THRESHOLD;
 }
 
 /**
@@ -170,7 +166,7 @@ export async function decide(
   const conflictDetected = await detectConflict(forecastOutput, triageOutput);
   
   // 2. Compute Risk Tier (Deterministic)
-  const fTier = getForecastTier(forecastOutput.predicted_aqi);
+  const fTier = getEpaForecastTier(forecastOutput.predicted_aqi);
   const tTier = getTriageTier(triageOutput.severity_signal);
   
   // If conflict, bias towards the higher risk (safety first approach)
