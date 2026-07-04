@@ -34,7 +34,7 @@ export function WhatIfSimulation({ zone }: { zone: string }) {
       
       <div className="mb-6 space-y-4">
         <div className="flex justify-between items-center bg-cp-bg-base border border-cp-border-subtle p-2">
-          <span className="text-cp-text-secondary text-xs">Target Zone</span>
+          <span className="text-cp-text-secondary text-xs">Target Location</span>
           <span className="text-cp-text-primary font-bold">{zone}</span>
         </div>
 

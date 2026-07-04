@@ -7,7 +7,7 @@ import { AgentTimeline } from "@/components/dashboard/AgentTimeline";
 import { WhatIfSimulation } from "@/components/dashboard/WhatIfSimulation";
 
 export default function DashboardPage() {
-  const [selectedZone, setSelectedZone] = useState("Zone-A");
+  const [selectedZone, setSelectedZone] = useState("Delhi");
 
   return (
     <main className="min-h-screen bg-cp-bg-base text-cp-text-primary p-cp-4 sm:p-cp-6">
@@ -24,16 +24,24 @@ export default function DashboardPage() {
           </div>
           
           <div className="flex items-center gap-cp-6">
-            <select 
-              value={selectedZone}
-              onChange={(e) => setSelectedZone(e.target.value)}
-              className="bg-cp-bg-surface border border-cp-border-subtle text-cp-text-primary px-3 py-1 font-mono text-xs outline-none focus:border-cp-text-secondary"
-            >
-              <option value="Zone-A">Zone-A</option>
-              <option value="Zone-B">Zone-B</option>
-              <option value="Zone-C">Zone-C</option>
-              <option value="Zone-D">Zone-D</option>
-            </select>
+            <div className="flex items-center gap-2">
+              <span className="text-cp-text-secondary text-xs uppercase tracking-widest font-mono">Location:</span>
+              <select 
+                value={selectedZone}
+                onChange={(e) => setSelectedZone(e.target.value)}
+                className="bg-cp-bg-surface border border-cp-border-subtle text-cp-text-primary px-3 py-1 font-mono text-xs outline-none focus:border-cp-text-secondary"
+              >
+                <option value="Delhi">Delhi</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Bangalore">Bangalore</option>
+                <option value="New York">New York</option>
+                <option value="London">London</option>
+                <option value="Tokyo">Tokyo</option>
+                <option disabled>──────────</option>
+                <option value="Zone-A">Zone-A (Delhi Central)</option>
+                <option value="Zone-B">Zone-B (Delhi West)</option>
+              </select>
+            </div>
 
             <span className="flex items-center gap-2 px-3 py-1 bg-cp-risk-low-bg border border-cp-risk-low/30 font-mono text-xs text-cp-risk-low uppercase">
               <span className="w-2 h-2 rounded-full bg-cp-risk-low animate-pulse" />

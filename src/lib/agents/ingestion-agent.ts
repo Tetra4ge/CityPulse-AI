@@ -23,6 +23,12 @@ const ZONE_COORDINATES: Record<string, { lat: number; lng: number }> = {
   "Zone-B": { lat: 28.5823, lng: 77.0500 }, // Dwarka (West)
   "Zone-C": { lat: 28.5355, lng: 77.2718 }, // Okhla (South)
   "Zone-D": { lat: 28.7495, lng: 77.1200 }, // Rohini (North)
+  "Delhi": { lat: 28.6139, lng: 77.2090 },
+  "Mumbai": { lat: 19.0760, lng: 72.8777 },
+  "Bangalore": { lat: 12.9716, lng: 77.5946 },
+  "New York": { lat: 40.7128, lng: -74.0060 },
+  "London": { lat: 51.5074, lng: -0.1278 },
+  "Tokyo": { lat: 35.6762, lng: 139.6503 }
 };
 
 // Default coords (Central Delhi)

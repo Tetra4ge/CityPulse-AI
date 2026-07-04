@@ -43,9 +43,9 @@ export function ZoneRiskGrid() {
 
   return (
     <div className="bg-cp-bg-surface border border-cp-border-subtle p-cp-4 h-full flex flex-col font-mono text-sm">
-      <h2 className="text-cp-text-primary font-bold mb-cp-4 uppercase tracking-widest text-xs border-b border-cp-border-subtle pb-2">Active Zone Risk Grid</h2>
+      <h2 className="text-cp-text-primary font-bold mb-cp-4 uppercase tracking-widest text-xs border-b border-cp-border-subtle pb-2">Active Location Risk Grid</h2>
       
-      <div className="grid grid-cols-2 gap-cp-4 flex-1">
+      <div className="flex-1 grid grid-cols-2 gap-cp-4 overflow-y-auto pr-2">
         {zones.map((z) => (
           <div 
             key={z.zone} 
@@ -59,7 +59,8 @@ export function ZoneRiskGrid() {
               'bg-cp-risk-low'
             }`} />
             
-            <div className="text-cp-text-secondary text-xs mb-1 uppercase tracking-wider">{z.zone}</div>
+            <div className="text-cp-text-secondary text-[10px] uppercase">Location:</div>
+            <div className="text-cp-text-primary font-bold mb-1">{z.zone}</div>
             <div className={`text-xl font-bold ${
               z.risk_level === 'severe' ? 'text-cp-risk-severe' :
               z.risk_level === 'high' ? 'text-cp-risk-high' :
