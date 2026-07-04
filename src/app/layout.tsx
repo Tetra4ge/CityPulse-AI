@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CityPulse AI — Urban Health Decision Intelligence",
+  title: "CityPulse AI - Urban Health Decision Intelligence",
   description:
     "Multi-agent decision intelligence platform that turns raw air quality, weather, and citizen complaint signals into actionable, human-approved municipal recommendations.",
 };
