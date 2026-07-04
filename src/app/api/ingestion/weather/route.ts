@@ -1,50 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { IngestionOutput } from "@/lib/types/agent-schemas";
-
-const MOCK_WEATHER_DATA: IngestionOutput[] = [
-  {
-    source: "weather",
-    zone: "Zone-A",
-    timestamp: new Date().toISOString(),
-    payload: { temperature_c: 38.2, humidity_pct: 45, wind_kph: 12.5 },
-    status: "ok",
-    confidence_penalty: 0.0,
-    _mock: true,
-  },
-  {
-    source: "weather",
-    zone: "Zone-B",
-    timestamp: new Date().toISOString(),
-    payload: { temperature_c: 36.8, humidity_pct: 52, wind_kph: 8.3 },
-    status: "ok",
-    confidence_penalty: 0.0,
-    _mock: true,
-  },
-  {
-    source: "weather",
-    zone: "Zone-C",
-    timestamp: new Date().toISOString(),
-    payload: { temperature_c: 39.1, humidity_pct: 40, wind_kph: 5.1 },
-    status: "ok",
-    confidence_penalty: 0.0,
-    _mock: true,
-  },
-  {
-    source: "weather",
-    zone: "Zone-D",
-    timestamp: new Date().toISOString(),
-    payload: { temperature_c: 35.5, humidity_pct: 58, wind_kph: 15.7 },
-    status: "ok",
-    confidence_penalty: 0.0,
-    _mock: true,
-  },
-];
+import { queryWeatherHistory } from "@/lib/db/bigquery-client";
+import { ingestWithRetry } from "@/lib/agents/ingestion-agent";
 
 export async function GET(request: NextRequest) {
-  const zone = request.nextUrl.searchParams.get("zone");
-  const data = zone
-    ? MOCK_WEATHER_DATA.filter((d) => d.zone === zone)
-    : MOCK_WEATHER_DATA;
+  try {
+    const zone = request.nextUrl.searchParams.get("zone") || undefined;
+    const data = await queryWeatherHistory(zone);
+    return NextResponse.json(data);
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: { code: "QUERY_FAILED", message: error.message } },
+      { status: 500 }
+    );
+  }
+}
 
-  return NextResponse.json(data);
+export async function POST(request: NextRequest) {
+  try {
+    let zone = "Zone-A";
+    try {
+      const body = await request.json();
+      if (body?.zone) {
+        zone = body.zone;
+      }
+    } catch {
+      const paramZone = request.nextUrl.searchParams.get("zone");
+      if (paramZone) {
+        zone = paramZone;
+      }
+    }
+
+    const result = await ingestWithRetry("weather", zone);
+    return NextResponse.json(result, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: { code: "INGESTION_FAILED", message: error.message } },
+      { status: 500 }
+    );
+  }
 }
