@@ -1,12 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ApprovalPendingItem } from "@/lib/types/agent-schemas";
+import type { ApprovalPendingItem, ForecastOutput, TriageOutput } from "@/lib/types/agent-schemas";
+
+// Extend the interface to include the new dynamic property
+interface ExtendedApprovalItem extends ApprovalPendingItem {
+  underlying_signals?: {
+    forecast: ForecastOutput;
+    triage: TriageOutput;
+  }
+}
 
 export function ApprovalQueue() {
-  const [pendingItems, setPendingItems] = useState<ApprovalPendingItem[]>([]);
+  const [pendingItems, setPendingItems] = useState<ExtendedApprovalItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [now, setNow] = useState<number>(Date.now());
+
+  useEffect(() => {
+    // Update 'now' every second for the escalation timer
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const fetchPending = async () => {
     try {
@@ -84,9 +99,34 @@ export function ApprovalQueue() {
         <span className="bg-cp-risk-high text-cp-bg-base px-2 py-0.5 rounded-full">{pendingItems.length} Pending</span>
       </h2>
       
-      <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
-        {pendingItems.map((item) => (
-          <div key={item.decision.id} className="border border-cp-border-subtle bg-cp-bg-base p-3 flex flex-col gap-3">
+      <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+        {/* Tier 2.2: Escalation sort. Unapproved severe items older than 30s go to the top */}
+        {[...pendingItems].sort((a, b) => {
+          const aAge = now - new Date(a.decision.generated_at).getTime();
+          const bAge = now - new Date(b.decision.generated_at).getTime();
+          const aEscalated = a.decision.risk_level === 'severe' && aAge > 30000 ? 1 : 0;
+          const bEscalated = b.decision.risk_level === 'severe' && bAge > 30000 ? 1 : 0;
+          return bEscalated - aEscalated;
+        }).map((item) => {
+          
+          const ageMs = now - new Date(item.decision.generated_at).getTime();
+          const isEscalated = item.decision.risk_level === 'severe' && ageMs > 30000;
+          const lowConfidence = item.decision.overall_confidence < 0.75;
+
+          return (
+          <div 
+            key={item.decision.id} 
+            className={`border bg-cp-bg-base p-3 flex flex-col gap-3 transition-all duration-500
+              ${isEscalated ? 'border-cp-risk-severe animate-pulse shadow-[0_0_15px_rgba(255,51,102,0.5)]' : 'border-cp-border-subtle'}
+              ${lowConfidence ? 'opacity-80 border-dashed' : ''}
+            `}
+          >
+            {/* Tier 2.2: Escalation Warning */}
+            {isEscalated && (
+              <div className="bg-cp-risk-severe text-cp-bg-base text-[10px] font-bold uppercase text-center py-1 animate-pulse">
+                ESCALATION WARNING: DECISION PENDING {Math.floor(ageMs / 1000)}s
+              </div>
+            )}
             
             {/* Header */}
             <div className="flex justify-between items-start">
@@ -106,6 +146,28 @@ export function ApprovalQueue() {
                 </span>
               </div>
             </div>
+
+            {/* Tier 1.2: Confidence Visuals */}
+            {lowConfidence && (
+              <div className="text-[10px] text-cp-risk-high uppercase font-bold border border-dashed border-cp-risk-high p-1 text-center">
+                Low Confidence Warning ({(item.decision.overall_confidence * 100).toFixed(0)}%)
+              </div>
+            )}
+
+            {/* Tier 1.3: "Why this and not that" Conflict View */}
+            {item.decision.conflict_detected && item.underlying_signals && (
+              <div className="grid grid-cols-2 gap-2 text-xs border border-cp-risk-high/30 p-2 bg-cp-bg-surface">
+                <div className="border-r border-cp-border-subtle pr-2">
+                  <span className="text-cp-text-secondary text-[10px] uppercase block mb-1">Forecast Agent</span>
+                  <div className="text-cp-text-primary">Predicted AQI: <span className="font-bold">{item.underlying_signals.forecast.predicted_aqi.toFixed(1)}</span></div>
+                </div>
+                <div className="pl-2">
+                  <span className="text-cp-text-secondary text-[10px] uppercase block mb-1">Triage Agent</span>
+                  <div className="text-cp-text-primary">Severity: <span className="font-bold uppercase text-cp-risk-high">{item.underlying_signals.triage.severity_signal}</span></div>
+                  <div className="text-cp-text-primary mt-1 text-[10px] italic">{item.underlying_signals.triage.summary}</div>
+                </div>
+              </div>
+            )}
 
             {/* Rationale */}
             <div>
@@ -142,7 +204,8 @@ export function ApprovalQueue() {
             </div>
 
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

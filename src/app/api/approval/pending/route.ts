@@ -39,8 +39,17 @@ export async function GET() {
           notes: "Reflection Agent has not processed this decision yet."
         };
       }
+      
+      // Fetch underlying signals (Tier 1.3 Conflict View)
+      const latestForecastLog = sqlite.prepare("SELECT output_json FROM agent_decisions_log WHERE agent_name = 'forecast' AND zone = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT 1").get(d.zone, d.generated_at) as any;
+      const latestTriageLog = sqlite.prepare("SELECT output_json FROM agent_decisions_log WHERE agent_name = 'triage' AND zone = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT 1").get(d.zone, d.generated_at) as any;
 
-      return { decision, reflection };
+      const underlying_signals = {
+        forecast: latestForecastLog ? JSON.parse(latestForecastLog.output_json) : null,
+        triage: latestTriageLog ? JSON.parse(latestTriageLog.output_json) : null
+      };
+
+      return { decision, reflection, underlying_signals };
     });
 
     return NextResponse.json(items);
