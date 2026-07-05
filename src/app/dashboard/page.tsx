@@ -13,7 +13,7 @@ export default function DashboardPage() {
   const [selectedZone, setSelectedZone] = useState("Delhi");
 
   return (
-    <main className="h-screen overflow-hidden bg-cp-bg-base text-cp-text-primary p-cp-4 sm:p-cp-6">
+    <main className="min-h-screen bg-cp-bg-base text-cp-text-primary p-cp-4 sm:p-cp-6">
       <div className="max-w-[1600px] mx-auto h-full flex flex-col">
         {/* Header */}
         <header className="mb-cp-6 flex items-center justify-between border-b border-cp-border-subtle pb-4">
@@ -62,37 +62,41 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Main Grid */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-cp-4 min-h-0">
+        {/* Main Grid - Row 1 (Top section) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-cp-4 mb-cp-4">
           
           {/* Left Column: Risk & Trends */}
-          <div className="lg:col-span-3 flex flex-col gap-cp-4 min-h-0">
-            <div className="flex-1 min-h-0">
+          <div className="lg:col-span-4 flex flex-col gap-cp-4">
+            <div>
               <ZoneRiskGrid />
             </div>
-            <div className="h-64 shrink-0">
+            <div className="h-64">
               <HistoricalTrends zone={selectedZone} />
             </div>
           </div>
 
-          {/* Middle Column: Agent Timeline */}
-          <div className="lg:col-span-6 min-h-0 flex flex-col gap-cp-4">
-            <ApprovalQueue />
-            <div className="flex-1 min-h-0">
-              <AgentTimeline zone={selectedZone} />
+          {/* Middle Column: Approval Queue */}
+          <div className="lg:col-span-4 flex flex-col gap-cp-4">
+            <div className="flex-1">
+              <ApprovalQueue />
             </div>
           </div>
 
           {/* Right Column: What-If Simulation & Benchmark */}
-          <div className="lg:col-span-3 min-h-0 flex flex-col gap-cp-4">
-            <div className="flex-1 min-h-0">
+          <div className="lg:col-span-4 flex flex-col gap-cp-4">
+            <div>
               <WhatIfSimulation zone={selectedZone} />
             </div>
-            <div className="h-64 shrink-0">
+            <div className="h-64">
               <AccelerationBenchmark />
             </div>
           </div>
           
+        </div>
+
+        {/* Main Grid - Row 2 (Bottom section, Full Width) */}
+        <div className="flex-1 min-h-[350px]">
+          <AgentTimeline zone={selectedZone} />
         </div>
       </div>
     </main>
