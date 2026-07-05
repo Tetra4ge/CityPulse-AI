@@ -24,7 +24,7 @@ export default function Home() {
           
           try {
             await fetch(`/api/orchestrator/run?zone=Custom&lat=${lat}&lng=${lng}`);
-            router.push("/dashboard");
+            router.push(`/dashboard?zone=Custom&lat=${lat}&lng=${lng}`);
           } catch (error) {
             console.error("Auto-trigger failed:", error);
             setIsProcessing(false);
@@ -51,7 +51,7 @@ export default function Home() {
     
     try {
       await fetch(`/api/orchestrator/run?zone=${newZone}`);
-      router.push("/dashboard");
+      router.push(`/dashboard?zone=${newZone}`);
     } catch (error) {
       console.error("Auto-trigger failed:", error);
       setIsProcessing(false);

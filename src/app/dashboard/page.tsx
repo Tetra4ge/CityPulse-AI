@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ZoneRiskGrid } from "@/components/dashboard/ZoneRiskGrid";
@@ -15,6 +15,23 @@ export default function DashboardPage() {
   const [selectedZone, setSelectedZone] = useState("Delhi");
   const [isLocating, setIsLocating] = useState(false);
   const [customCoords, setCustomCoords] = useState<{lat: number, lng: number} | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const zone = params.get("zone");
+      const latStr = params.get("lat");
+      const lngStr = params.get("lng");
+
+      if (latStr && lngStr) {
+        setCustomCoords({ lat: parseFloat(latStr), lng: parseFloat(lngStr) });
+      }
+
+      if (zone) {
+        setSelectedZone(zone);
+      }
+    }
+  }, []);
 
   const handleUseMyLocation = () => {
     setIsLocating(true);
@@ -104,7 +121,7 @@ export default function DashboardPage() {
                 <option value="New York">New York</option>
                 <option value="London">London</option>
                 <option value="Tokyo">Tokyo</option>
-                {customCoords && <option value="Custom">📍 Custom</option>}
+                {(customCoords || selectedZone === "Custom") && <option value="Custom">📍 Custom</option>}
                 <option disabled>──────────</option>
                 <option value="Zone-A">Zone-A (Delhi Central)</option>
                 <option value="Zone-B">Zone-B (Delhi West)</option>
