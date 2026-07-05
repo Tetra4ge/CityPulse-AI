@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ZoneRiskGrid } from "@/components/dashboard/ZoneRiskGrid";
 import { HistoricalTrends } from "@/components/dashboard/HistoricalTrends";
@@ -10,7 +11,74 @@ import { ApprovalQueue } from "@/components/dashboard/ApprovalQueue";
 import { AccelerationBenchmark } from "@/components/dashboard/AccelerationBenchmark";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [selectedZone, setSelectedZone] = useState("Delhi");
+  const [isLocating, setIsLocating] = useState(false);
+  const [customCoords, setCustomCoords] = useState<{lat: number, lng: number} | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const zone = params.get("zone");
+      const latStr = params.get("lat");
+      const lngStr = params.get("lng");
+
+      if (latStr && lngStr) {
+        setCustomCoords({ lat: parseFloat(latStr), lng: parseFloat(lngStr) });
+      }
+
+      if (zone) {
+        setSelectedZone(zone);
+      }
+    }
+  }, []);
+
+  const handleUseMyLocation = () => {
+    setIsLocating(true);
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setCustomCoords({ lat, lng });
+          setSelectedZone("Custom");
+          
+          // Auto-trigger the pipeline in the background
+          try {
+            await fetch(`/api/orchestrator/run?zone=Custom&lat=${lat}&lng=${lng}`);
+            // Refresh the server components to show the newly ingested data
+            router.refresh();
+          } catch (error) {
+            console.error("Auto-trigger failed:", error);
+          } finally {
+            setIsLocating(false);
+          }
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          alert("Failed to get location. Please allow location access.");
+          setIsLocating(false);
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+      setIsLocating(false);
+    }
+  };
+
+  const handleZoneChange = async (newZone: string) => {
+    setSelectedZone(newZone);
+    setIsLocating(true);
+    
+    try {
+      await fetch(`/api/orchestrator/run?zone=${newZone}`);
+      router.refresh();
+    } catch (error) {
+      console.error("Auto-trigger failed:", error);
+    } finally {
+      setIsLocating(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-cp-bg-base text-cp-text-primary p-cp-4 sm:p-cp-6">
@@ -38,11 +106,14 @@ export default function DashboardPage() {
           
           <div className="flex items-center gap-cp-6">
             <div className="flex items-center gap-2">
-              <span className="text-cp-text-secondary text-xs uppercase tracking-widest font-mono">Location:</span>
+              <span className="text-cp-text-secondary text-xs uppercase tracking-widest font-mono">
+                {isLocating ? "⏳ Processing..." : "Location:"}
+              </span>
               <select 
                 value={selectedZone}
-                onChange={(e) => setSelectedZone(e.target.value)}
-                className="bg-cp-bg-surface border border-cp-border-subtle text-cp-text-primary px-3 py-1 font-mono text-xs outline-none focus:border-cp-text-secondary"
+                onChange={(e) => handleZoneChange(e.target.value)}
+                disabled={isLocating}
+                className="bg-cp-bg-surface border border-cp-border-subtle text-cp-text-primary px-3 py-1 font-mono text-xs outline-none focus:border-cp-text-secondary disabled:opacity-50"
               >
                 <option value="Delhi">Delhi</option>
                 <option value="Mumbai">Mumbai</option>
@@ -50,10 +121,19 @@ export default function DashboardPage() {
                 <option value="New York">New York</option>
                 <option value="London">London</option>
                 <option value="Tokyo">Tokyo</option>
+                {(customCoords || selectedZone === "Custom") && <option value="Custom">📍 Custom</option>}
                 <option disabled>──────────</option>
                 <option value="Zone-A">Zone-A (Delhi Central)</option>
                 <option value="Zone-B">Zone-B (Delhi West)</option>
               </select>
+              <button
+                  onClick={handleUseMyLocation}
+                  disabled={isLocating}
+                  className="px-2 py-1 border border-cp-border-subtle bg-cp-bg-surface text-cp-text-primary hover:border-cp-text-muted transition-colors disabled:opacity-50 text-xs"
+                  title="Use My Current Location"
+                >
+                  {isLocating ? "⏳" : "📍"}
+              </button>
             </div>
 
             <span className="flex items-center gap-2 px-3 py-1 bg-cp-risk-low-bg border border-cp-risk-low/30 font-mono text-xs text-cp-risk-low uppercase">

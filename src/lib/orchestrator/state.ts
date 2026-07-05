@@ -19,6 +19,14 @@ import type {
 export const CityPulseStateAnnotation = Annotation.Root({
   zone: Annotation<string>,
   decisionId: Annotation<string>,
+  lat: Annotation<number | null>({
+    default: () => null,
+    reducer: (oldState, newState) => newState ?? oldState
+  }),
+  lng: Annotation<number | null>({
+    default: () => null,
+    reducer: (oldState, newState) => newState ?? oldState
+  }),
   ingestionResult: Annotation<IngestionOutput | null>({
     default: () => null,
     reducer: (oldState, newState) => newState ?? oldState

@@ -22,7 +22,7 @@ export async function ingestNode(state: CityPulseState): Promise<Partial<CityPul
   console.log(`[LangGraph] Running Ingest Node for zone: ${state.zone}`);
   
   // We trigger AQI ingestion as the primary data point.
-  const aqiResult = await ingestWithRetry("aqi", state.zone);
+  const aqiResult = await ingestWithRetry("aqi", state.zone, state.lat, state.lng);
   
   return {
     ingestionResult: aqiResult

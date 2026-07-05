@@ -21,12 +21,12 @@ import { CityPulseState } from "./orchestrator/state";
  * @param threadId The unique ID for the graph execution thread
  * @returns The final state of the graph after all agents have run
  */
-export async function runPipeline(zone: string, threadId: string): Promise<CityPulseState> {
+export async function runPipeline(zone: string, threadId: string, lat?: number | null, lng?: number | null): Promise<CityPulseState> {
   console.log(`[Orchestrator] Starting LangGraph pipeline for zone: ${zone}, thread: ${threadId}`);
   
   // Invoke the compiled graph with the initial state and the checkpointer thread_id
   const finalState = await appGraph.invoke(
-    { zone, decisionId: threadId },
+    { zone, decisionId: threadId, lat: lat ?? null, lng: lng ?? null },
     { configurable: { thread_id: threadId } }
   );
   

@@ -43,13 +43,16 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * Pull data from an external source and normalize it.
  * Writes raw payload to storage and normalized record to database.
  */
-export async function ingest(source: IngestionSource, zone: string = "Zone-A"): Promise<IngestionOutput> {
+export async function ingest(source: IngestionSource, zone: string = "Zone-A", lat?: number | null, lng?: number | null): Promise<IngestionOutput> {
   // Support forced failures for manual testing
   if (zone === "FORCE_FAILURE" || process.env.FORCE_INGESTION_FAILURE === "true") {
     throw new Error("Forced ingestion failure for testing retry/failover path.");
   }
 
-  const coords = ZONE_COORDINATES[zone] || DEFAULT_COORDS;
+  let coords = ZONE_COORDINATES[zone] || DEFAULT_COORDS;
+  if (lat != null && lng != null) {
+    coords = { lat, lng };
+  }
   const timestamp = new Date().toISOString();
 
   if (source === "aqi") {
@@ -165,12 +168,14 @@ export async function ingest(source: IngestionSource, zone: string = "Zone-A"): 
 export async function ingestWithRetry(
   source: IngestionSource,
   zone: string = "Zone-A",
+  lat?: number | null,
+  lng?: number | null,
   maxRetries: number = 3
 ): Promise<IngestionOutput> {
   let attempt = 0;
   while (attempt < maxRetries) {
     try {
-      return await ingest(source, zone);
+      return await ingest(source, zone, lat, lng);
     } catch (err: any) {
       attempt++;
       console.warn(`Ingestion attempt ${attempt} failed for ${source} in ${zone}: ${err.message}`);
