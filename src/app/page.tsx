@@ -62,23 +62,29 @@ export default function Home() {
             <p className="text-cp-h3 text-cp-text-secondary font-mono mt-cp-2">The Multi-Agent Urban Defense Grid</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-cp-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-cp-8 mt-cp-8">
             <div className="border border-cp-border-default bg-cp-bg-surface p-cp-6 hover:border-cp-accent-primary transition-colors">
-              <h3 className="text-cp-h2 font-mono text-cp-accent-primary uppercase mb-cp-4">1. State Machine</h3>
+              <h3 className="text-cp-h2 font-mono text-cp-accent-primary uppercase mb-cp-4">1. Robust Gemini Integration</h3>
               <p className="text-cp-small font-sans text-cp-text-secondary leading-relaxed">
-                Rather than just displaying data, CityPulse utilizes a <strong>LangGraph orchestrator</strong>. It operates as a strict state machine, managing the flow of data between specialized AI agents without hallucination loops.
+                The entire intelligence layer is powered by <strong>Google Gemini 2.0 Flash</strong>. Crucially, the AI integration utilizes a resilient <em>lazy-loading architecture</em> that prevents Next.js caching bugs, ensuring environment variables always resolve perfectly at runtime.
               </p>
             </div>
             <div className="border border-cp-border-default bg-cp-bg-surface p-cp-6 hover:border-cp-risk-medium transition-colors">
-              <h3 className="text-cp-h2 font-mono text-cp-risk-medium uppercase mb-cp-4">2. Agent Swarm</h3>
+              <h3 className="text-cp-h2 font-mono text-cp-risk-medium uppercase mb-cp-4">2. Agent Swarm via LangGraph</h3>
               <p className="text-cp-small font-sans text-cp-text-secondary leading-relaxed">
-                The <strong>Ingestion</strong> and <strong>Triage</strong> agents actively monitor city APIs and citizen complaints. The <strong>Forecast</strong> agent predicts the future, while <strong>Decision</strong> and <strong>Reflection</strong> agents synthesize actions.
+                The <strong>Ingestion</strong> and <strong>Triage</strong> agents actively monitor city APIs. <strong>Forecast</strong> predicts the future, while <strong>Decision</strong> and <strong>Reflection</strong> synthesize mitigation plans in a strict LangGraph state machine.
               </p>
             </div>
             <div className="border border-cp-border-default bg-cp-bg-surface p-cp-6 hover:border-cp-risk-high transition-colors">
               <h3 className="text-cp-h2 font-mono text-cp-risk-high uppercase mb-cp-4">3. HITL Architecture</h3>
               <p className="text-cp-small font-sans text-cp-text-secondary leading-relaxed">
-                Because AI can make mistakes, the system features a <strong>Human-in-the-Loop (HITL)</strong> Checkpoint. High-risk decisions are paused in memory and sent to the dashboard for human authorization before dispatch.
+                The system features a strict <strong>Human-in-the-Loop (HITL)</strong> checkpoint. High-risk decisions are paused and sent to the dashboard's <em>Approval Queue</em> for human oversight. If rejected, a <strong>Learning Agent</strong> extracts new behavioral rules for future use!
+              </p>
+            </div>
+            <div className="border border-cp-border-default bg-cp-bg-surface p-cp-6 hover:border-cp-risk-severe transition-colors">
+              <h3 className="text-cp-h2 font-mono text-cp-risk-severe uppercase mb-cp-4">4. GPU What-If Simulations</h3>
+              <p className="text-cp-small font-sans text-cp-text-secondary leading-relaxed">
+                City officials can execute <strong>"What-If" simulations</strong> directly from Mission Control. Backed by <em>cuDF</em> and <em>cuML</em> on Nvidia hardware, traffic changes can be simulated in milliseconds, generating fully revised AI decisions instantly.
               </p>
             </div>
           </div>
