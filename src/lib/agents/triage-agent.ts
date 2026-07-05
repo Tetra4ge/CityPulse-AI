@@ -7,7 +7,7 @@
  * and detect spatial/temporal hotspots, and escalates directly to the Decision Agent on spikes.
  */
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateContent, isLLMAvailable } from "../ai-client";
 import {
   queryComplaintsHistory,
   insertTimelineEntry,
@@ -30,16 +30,13 @@ const DEFAULT_COORDS = { lat: 28.6139, lng: 77.2090 };
 /**
  * Classify a complaint text using Gemini.
  */
-async function classifyComplaintWithGemini(
+async function classifyComplaintWithLLM(
   rawText: string
 ): Promise<{ category: ComplaintCategory; severity: SeveritySignal; summary: string }> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("Gemini AI client not initialized (missing API key)");
+  if (!isLLMAvailable()) {
+    throw new Error("No LLM API key configured (set OPENROUTER_API_KEY or GEMINI_API_KEY)");
   }
-  const ai = new GoogleGenerativeAI(apiKey);
 
-  const model = ai.getGenerativeModel({ model: "gemini-2.0-flash" });
   const prompt = `
     You are an expert urban dispatcher. Classify the following citizen complaint about air quality or weather.
     Complaint: "${rawText}"
@@ -52,9 +49,8 @@ async function classifyComplaintWithGemini(
     Format: Return ONLY valid JSON. Do not write anything else.
   `;
 
-  const result = await model.generateContent(prompt);
-  const text = (await result.response).text().trim();
-  const jsonText = text.replace(/```json/g, "").replace(/```/g, "").trim();
+  const result = await generateContent(prompt, { jsonMode: true });
+  const jsonText = result.text.replace(/```json/g, "").replace(/```/g, "").trim();
   const data = JSON.parse(jsonText);
 
   return {
@@ -131,12 +127,11 @@ function classifyComplaintKeywordFallback(
 export async function classifyComplaint(
   rawText: string
 ): Promise<{ category: ComplaintCategory; severity: SeveritySignal; summary: string }> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (apiKey) {
+  if (isLLMAvailable()) {
     try {
-      return await classifyComplaintWithGemini(rawText);
+      return await classifyComplaintWithLLM(rawText);
     } catch (err: any) {
-      console.warn(`Gemini classification failed: ${err.message}. Using rule-based fallback.`);
+      console.warn(`LLM classification failed: ${err.message}. Using rule-based fallback.`);
     }
   }
   return classifyComplaintKeywordFallback(rawText);

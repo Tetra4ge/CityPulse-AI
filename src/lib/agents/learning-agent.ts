@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateContent, isLLMAvailable } from "../ai-client";
 import { db } from "../db";
 import { learnedHeuristics } from "../db/schema";
 import crypto from "crypto";
@@ -12,18 +12,9 @@ export async function learnFromFeedback(
 ): Promise<string> {
   console.log(`[Learning Agent] Processing feedback for decision ${decisionId}`);
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not set");
+  if (!isLLMAvailable()) {
+    throw new Error("No LLM API key configured");
   }
-
-  const ai = new GoogleGenerativeAI(apiKey);
-  const model = ai.getGenerativeModel({ 
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      temperature: 0.1
-    }
-  });
 
   const prompt = `
     System Role: You are the CityPulse Feedback & Learning Agent.
@@ -43,8 +34,8 @@ export async function learnFromFeedback(
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const extractedRule = (await result.response).text().trim();
+    const result = await generateContent(prompt, { temperature: 0.1 });
+    const extractedRule = result.text;
 
     // Store the learned heuristic in the database
     await db.insert(learnedHeuristics).values({
@@ -59,7 +50,7 @@ export async function learnFromFeedback(
     console.log(`[Learning Agent] New rule stored: ${extractedRule}`);
     return extractedRule;
   } catch (err) {
-    console.error("Gemini failed to generate heuristic:", err);
+    console.error("LLM failed to generate heuristic:", err);
     throw err;
   }
 }

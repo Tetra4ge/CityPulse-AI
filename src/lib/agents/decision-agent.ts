@@ -5,7 +5,7 @@
  * Detect and resolve conflicts between predictive and ground-truth signals.
  */
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateContent, isLLMAvailable } from "../ai-client";
 import { insertDecision, insertTimelineEntry } from "../db/bigquery-client";
 import { ingestWithRetry } from "./ingestion-agent";
 import { forecast } from "./forecast-agent";
@@ -115,20 +115,13 @@ async function evaluateDecisionWithHeuristics(
   conflictDetected: boolean,
   resolvedWithNewData: boolean
 ): Promise<{ risk_level: RiskLevel, rationale: string }> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  if (!isLLMAvailable()) {
     return { risk_level: computedRisk, rationale: `[Fallback] Computed Risk: ${computedRisk}. AI disabled.` };
   }
-  const ai = new GoogleGenerativeAI(apiKey);
 
   // Fetch learned heuristics for the zone
   const heuristicsRecords = await db.select().from(learnedHeuristics).where(eq(learnedHeuristics.zone, zone));
   const rules = heuristicsRecords.map(h => `- ${h.extractedRule}`).join("\n");
-
-  const model = ai.getGenerativeModel({ 
-    model: "gemini-2.0-flash",
-    generationConfig: { responseMimeType: "application/json" }
-  });
   
   const prompt = `
     You are the Decision Agent for CityPulse AI.
@@ -150,14 +143,14 @@ async function evaluateDecisionWithHeuristics(
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const obj = JSON.parse((await result.response).text().trim());
+    const result = await generateContent(prompt, { jsonMode: true });
+    const obj = JSON.parse(result.text);
     return {
       risk_level: obj.risk_level as RiskLevel || computedRisk,
       rationale: obj.rationale || `Computed Risk: ${computedRisk}.`
     };
   } catch (err) {
-    console.error("Gemini failed in evaluateDecisionWithHeuristics:", err);
+    console.error("LLM failed in evaluateDecisionWithHeuristics:", err);
     return { risk_level: computedRisk, rationale: `[Fallback] Computed Risk: ${computedRisk}.` };
   }
 }

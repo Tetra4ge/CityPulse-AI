@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateContent, isLLMAvailable } from "../ai-client";
 import { ForecastOutput, ResourceOutput } from "../types/agent-schemas";
 import { db } from "../db";
 import { hospitalStatus, transitStatus } from "../db/schema";
@@ -32,20 +32,9 @@ export async function resource(forecastResult: ForecastOutput, zone: string): Pr
     }
   };
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not set");
+  if (!isLLMAvailable()) {
+    throw new Error("No LLM API key configured");
   }
-
-  const ai = new GoogleGenerativeAI(apiKey);
-
-  const model = ai.getGenerativeModel({ 
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      temperature: 0.1
-    }
-  });
 
   const prompt = `
     System Role: You are the CityPulse Logistics & Resource Coordinator.
@@ -69,20 +58,19 @@ export async function resource(forecastResult: ForecastOutput, zone: string): Pr
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const text = (await result.response).text().trim();
-    const object = JSON.parse(text);
+    const result = await generateContent(prompt, { jsonMode: true, temperature: 0.1 });
+    const object = JSON.parse(result.text);
     return {
       ...object,
       data_stale: dataStale
     };
   } catch (err) {
-    console.error("Gemini failed to generate resource output:", err);
+    console.error("LLM failed to generate resource output:", err);
     // Fallback if API fails (rate limits)
     return {
       resource_risk_score: 0.8,
       bottlenecks: [`hospital_beds_${zone.toLowerCase()}`],
-      analysis: "[Fallback Analysis] Gemini quota exceeded. Assuming critical resource bottleneck for safety.",
+      analysis: "[Fallback Analysis] LLM API quota exceeded. Assuming critical resource bottleneck for safety.",
       data_stale: dataStale,
       _mock: true
     };

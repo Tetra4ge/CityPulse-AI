@@ -5,7 +5,7 @@
  * Checks confidence, conflict, data staleness, and uses an LLM to sanity-check logic.
  */
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateContent, isLLMAvailable } from "../ai-client";
 import { insertReflection, insertTimelineEntry } from "../db/bigquery-client";
 import {
   DecisionOutput,
@@ -24,14 +24,10 @@ import crypto from "crypto";
  * Perform a fast LLM sanity check to ensure recommendations align with the rationale.
  */
 async function checkConsistencyWithLLM(decision: DecisionOutput): Promise<boolean> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  if (!isLLMAvailable()) {
     // If no AI configured, assume consistent (true)
     return true;
   }
-
-  const ai = new GoogleGenerativeAI(apiKey);
-  const model = ai.getGenerativeModel({ model: "gemini-2.0-flash" });
   const prompt = `
     You are a validation agent. Your job is to read a policy decision and verify if the 'recommendations' logically follow the stated 'rationale'.
     
@@ -43,11 +39,11 @@ async function checkConsistencyWithLLM(decision: DecisionOutput): Promise<boolea
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const text = (await result.response).text().trim().toLowerCase();
+    const result = await generateContent(prompt);
+    const text = result.text.toLowerCase();
     return text === "true";
   } catch (err: any) {
-    console.error("Gemini failed consistency check:", err);
+    console.error("LLM failed consistency check:", err);
     return true; // fail open for the consistency check to avoid blocking on API errors
   }
 }
