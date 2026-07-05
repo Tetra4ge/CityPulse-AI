@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ZoneRiskGrid } from "@/components/dashboard/ZoneRiskGrid";
 import { HistoricalTrends } from "@/components/dashboard/HistoricalTrends";
@@ -10,6 +11,7 @@ import { ApprovalQueue } from "@/components/dashboard/ApprovalQueue";
 import { AccelerationBenchmark } from "@/components/dashboard/AccelerationBenchmark";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [selectedZone, setSelectedZone] = useState("Delhi");
   const [isLocating, setIsLocating] = useState(false);
   const [customCoords, setCustomCoords] = useState<{lat: number, lng: number} | null>(null);
@@ -18,10 +20,22 @@ export default function DashboardPage() {
     setIsLocating(true);
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCustomCoords({ lat: position.coords.latitude, lng: position.coords.longitude });
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setCustomCoords({ lat, lng });
           setSelectedZone("Custom");
-          setIsLocating(false);
+          
+          // Auto-trigger the pipeline in the background
+          try {
+            await fetch(`/api/orchestrator/run?zone=Custom&lat=${lat}&lng=${lng}`);
+            // Refresh the server components to show the newly ingested data
+            router.refresh();
+          } catch (error) {
+            console.error("Auto-trigger failed:", error);
+          } finally {
+            setIsLocating(false);
+          }
         },
         (error) => {
           console.error("Error getting location:", error);
