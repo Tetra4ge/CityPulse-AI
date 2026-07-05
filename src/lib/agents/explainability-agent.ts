@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateContent, isLLMAvailable } from "../ai-client";
 import { 
   ForecastOutput, 
   TriageOutput, 
@@ -18,19 +18,9 @@ export async function explain(
 ): Promise<ExplainabilityOutput> {
   console.log(`[Explainability Agent] Generating trace report for zone: ${zone}`);
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not set");
+  if (!isLLMAvailable()) {
+    throw new Error("No LLM API key configured");
   }
-
-  const ai = new GoogleGenerativeAI(apiKey);
-  const model = ai.getGenerativeModel({ 
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      temperature: 0.1
-    }
-  });
 
   const contextData = {
     zone,
@@ -58,12 +48,11 @@ export async function explain(
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const text = (await result.response).text().trim();
-    const object = JSON.parse(text);
+    const result = await generateContent(prompt, { jsonMode: true, temperature: 0.1 });
+    const object = JSON.parse(result.text);
     return object as ExplainabilityOutput;
   } catch (err) {
-    console.error("Gemini failed to generate explainability output:", err);
+    console.error("LLM failed to generate explainability output:", err);
     
     // Fallback if API fails
     return {
