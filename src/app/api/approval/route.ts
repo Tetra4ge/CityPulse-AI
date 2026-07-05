@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sqlite } from "@/lib/db";
 import { insertTimelineEntry } from "@/lib/db/bigquery-client";
+import { learnFromFeedback } from "@/lib/agents/learning-agent";
 import type { ApprovalResponse } from "@/lib/types/agent-schemas";
 import crypto from "crypto";
 
@@ -45,6 +46,17 @@ export async function POST(request: NextRequest) {
       escalation_flag: false,
       confidence: 1.0,
     });
+
+    if (status === "rejected" && notes) {
+      // Trigger the Learning Agent asynchronously
+      learnFromFeedback(
+        decision.zone,
+        decision_id,
+        decision.risk_level,
+        notes,
+        decision // Pass the decision as context
+      ).catch(err => console.error("[API] Learning Agent failed:", err));
+    }
 
     // RESUME THE LANGGRAPH PIPELINE!
     // Since we used decision_id as the thread_id, we can resume the exact paused thread.

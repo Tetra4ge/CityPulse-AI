@@ -75,6 +75,7 @@ export const decisions = sqliteTable('decisions', {
   conflictDetected: integer('conflict_detected', { mode: 'boolean' }).default(false),
   recommendations: text('recommendations', { mode: 'json' }).notNull(),
   rationale: text('rationale'),
+  traceReport: text('trace_report'),
   reflectionId: text('reflection_id'),
   approvalStatus: text('approval_status').default('pending'), // 'pending' | 'approved' | 'rejected'
   reviewerId: text('reviewer_id'),
@@ -118,4 +119,14 @@ export const transitStatus = sqliteTable("transit_status", {
   availableUnits: integer("available_units").notNull(),
   status: text("status").notNull(), // 'operational', 'degraded', 'offline'
   lastUpdated: text("last_updated").notNull(),
+});
+
+export const learnedHeuristics = sqliteTable("learned_heuristics", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  zone: text("zone").notNull(),
+  decisionId: text("decision_id").notNull(),
+  originalRisk: text("original_risk").notNull(),
+  humanFeedback: text("human_feedback").notNull(),
+  extractedRule: text("extracted_rule").notNull(),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });

@@ -6,7 +6,8 @@ import {
   forecastNode, 
   resourceNode,
   decisionNode, 
-  reflectionNode 
+  reflectionNode,
+  explainabilityNode
 } from "./nodes";
 
 // 1. Initialize the StateGraph with our defined state channels and chain methods
@@ -18,6 +19,7 @@ const workflow = new StateGraph(CityPulseStateAnnotation)
   .addNode("resource", resourceNode)
   .addNode("decision", decisionNode)
   .addNode("reflection", reflectionNode)
+  .addNode("explainability", explainabilityNode)
   
   // 3. Define the edges (the execution flow)
   .addEdge(START, "ingest")
@@ -26,7 +28,8 @@ const workflow = new StateGraph(CityPulseStateAnnotation)
   .addEdge("forecast", "resource")
   .addEdge("resource", "decision")
   .addEdge("decision", "reflection")
-  .addEdge("reflection", END);
+  .addEdge("reflection", "explainability")
+  .addEdge("explainability", END);
 
 // 4. Initialize Checkpointer for Human-in-the-Loop state persistence
 const memory = new MemorySaver();

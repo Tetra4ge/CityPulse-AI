@@ -11,6 +11,9 @@ import { ingestWithRetry } from "./ingestion-agent";
 import { forecast } from "./forecast-agent";
 import { triage } from "./triage-agent";
 import { getEpaForecastTier, CONFLICT_DIVERGENCE_THRESHOLD } from "../config/thresholds";
+import { db } from "../db";
+import { learnedHeuristics } from "../db/schema";
+import { eq } from "drizzle-orm";
 import type {
   ForecastOutput,
   TriageOutput,
@@ -105,10 +108,10 @@ function generateRecommendations(tier: number, zone: string, bottlenecks: string
 }
 
 /**
- * Uses Gemini to generate a rationale EXPLAINING the already-computed decision.
- * It is strictly forbidden from changing the risk level itself.
+ * Uses Gemini to evaluate the deterministic baseline against learned heuristics,
+ * allowing it to override the risk level if a strict rule applies, and generate rationale.
  */
-async function generateRationale(
+async function evaluateDecisionWithHeuristics(
   zone: string,
   forecastOutput: ForecastOutput,
   triageOutput: TriageOutput,
@@ -116,45 +119,49 @@ async function generateRationale(
   computedRisk: RiskLevel,
   conflictDetected: boolean,
   resolvedWithNewData: boolean
-): Promise<string> {
+): Promise<{ risk_level: RiskLevel, rationale: string }> {
   if (!ai) {
-    return `[Fallback Rationale] Computed Risk: ${computedRisk}. Conflict: ${conflictDetected}. AI disabled.`;
+    return { risk_level: computedRisk, rationale: `[Fallback] Computed Risk: ${computedRisk}. AI disabled.` };
   }
 
-  const model = ai.getGenerativeModel({ model: "gemini-2.0-flash" });
+  // Fetch learned heuristics for the zone
+  const heuristicsRecords = await db.select().from(learnedHeuristics).where(eq(learnedHeuristics.zone, zone));
+  const rules = heuristicsRecords.map(h => `- ${h.extractedRule}`).join("\n");
+
+  const model = ai.getGenerativeModel({ 
+    model: "gemini-2.0-flash",
+    generationConfig: { responseMimeType: "application/json" }
+  });
   
-  let conflictContext = conflictDetected 
-    ? "A severe conflict was detected between the predictive forecast and ground-truth citizen reports." 
-    : "Forecast and citizen reports are in general agreement.";
-    
-  if (resolvedWithNewData) {
-    conflictContext = "A conflict was initially detected, but supplementary real-time sensor data was fetched to resolve the disagreement in favor of the more severe localized ground-truth.";
-  }
-
   const prompt = `
     You are the Decision Agent for CityPulse AI.
-    Your job is to write a 2-3 sentence human-readable rationale EXPLAINING a policy decision that was ALREADY COMPUTED by deterministic rules.
     
-    COMPUTED CONTEXT:
+    COMPUTED BASELINE:
     - Zone: ${zone}
-    - Final Computed Risk Level: ${computedRisk}
-    - Forecast AQI: ${forecastOutput.predicted_aqi} (Reasoning: ${forecastOutput.reasoning})
-    - Triage Severity: ${triageOutput.severity_signal.toUpperCase()} (Citizen reports: ${triageOutput.complaint_count})
-    - Resource Risk Score: ${resourceOutput.resource_risk_score} (Bottlenecks: ${resourceOutput.bottlenecks.join(", ")})
-    - Conflict Status: ${conflictContext}
+    - Baseline Risk Level: ${computedRisk}
+    - Forecast AQI: ${forecastOutput.predicted_aqi}
+    - Triage Severity: ${triageOutput.severity_signal}
+    - Resource Score: ${resourceOutput.resource_risk_score} (Bottlenecks: ${resourceOutput.bottlenecks.join(", ") || "none"})
+    
+    LEARNED HUMAN HEURISTICS (MANDATORY RULES):
+    ${rules || "No custom rules learned yet."}
     
     INSTRUCTIONS:
-    - Write a short, professional rationale summarizing why the ${computedRisk} risk level was chosen.
-    - DO NOT change the risk level. DO NOT compute a new decision. Just explain the data.
-    - Do not use markdown, just plain text.
+    1. Determine if any Learned Human Heuristics override the Baseline Risk Level. If so, apply the override.
+    2. Write a 2-3 sentence rationale explaining the final decision. If you applied a heuristic, explicitly mention that human feedback dictated this override.
+    3. Return valid JSON with "risk_level" (must be "low", "medium", "high", or "severe") and "rationale".
   `;
 
   try {
     const result = await model.generateContent(prompt);
-    return (await result.response).text().trim();
-  } catch (err: any) {
-    console.error("Gemini failed to generate rationale:", err);
-    return `[Fallback Rationale] Computed Risk: ${computedRisk}. Conflict: ${conflictDetected}.`;
+    const obj = JSON.parse((await result.response).text().trim());
+    return {
+      risk_level: obj.risk_level as RiskLevel || computedRisk,
+      rationale: obj.rationale || `Computed Risk: ${computedRisk}.`
+    };
+  } catch (err) {
+    console.error("Gemini failed in evaluateDecisionWithHeuristics:", err);
+    return { risk_level: computedRisk, rationale: `[Fallback] Computed Risk: ${computedRisk}.` };
   }
 }
 
@@ -189,27 +196,33 @@ export async function decide(
   }
   overallConfidence = Math.max(0.1, Math.min(overallConfidence, 1.0));
   
-  // 4. Generate Target Recommendations (Deterministic)
-  const recommendations = generateRecommendations(finalTier, zone, resourceOutput.bottlenecks);
+  // 4. Generate Target Recommendations (Deterministic, we will re-generate below based on LLM final risk)
   
-  // 5. Generate Rationale (LLM)
-  const rationale = await generateRationale(
+  // 5. Generate Rationale & Final Risk Level (LLM with Heuristics)
+  const evalResult = await evaluateDecisionWithHeuristics(
     zone,
     forecastOutput,
     triageOutput,
     resourceOutput,
-    finalRiskLevel,
+    finalRiskLevel, // passed as baseline
     conflictDetected,
     resolvedWithNewData
   );
 
+  const finalRiskLevelAfterRules = evalResult.risk_level;
+  
+  // Convert string risk back to tier for deterministic recommendations
+  const riskToTier = { "low": 0, "medium": 1, "high": 2, "severe": 3 };
+  const finalTierAfterRules = riskToTier[finalRiskLevelAfterRules] ?? finalTier;
+  const recommendations = generateRecommendations(finalTierAfterRules, zone, resourceOutput.bottlenecks);
+
   const decision: DecisionOutput = {
     zone,
-    risk_level: finalRiskLevel,
+    risk_level: finalRiskLevelAfterRules,
     overall_confidence: Number(overallConfidence.toFixed(2)),
     conflict_detected: conflictDetected && !resolvedWithNewData,
     recommendations,
-    rationale,
+    rationale: evalResult.rationale,
   };
 
   // 6. Log to Timeline
@@ -284,7 +297,14 @@ export async function resolveConflict(
   const updatedTriage = await triage(zone);
 
   // 3. Re-evaluate Decision
-  const resolvedDecision = await decide(updatedForecast, updatedTriage, zone, true);
+  // We mock a resource output here for simplicity since resolveConflict doesn't have it in scope
+  const mockResourceOutput: ResourceOutput = {
+    resource_risk_score: 0.8,
+    bottlenecks: ["hospital_beds_zone_a"],
+    analysis: "Mocked resolution resource state",
+    data_stale: false
+  };
+  const resolvedDecision = await decide(updatedForecast, updatedTriage, mockResourceOutput, zone, true);
   
   // 4. Save to decisions table
   // The actual POST route handles saving to `decisions` table, but we will log it.

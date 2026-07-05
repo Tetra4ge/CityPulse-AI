@@ -5,8 +5,14 @@ import { forecast } from "../agents/forecast-agent";
 import { decide } from "../agents/decision-agent";
 import { reflect } from "../agents/reflection-agent";
 import { resource } from "../agents/resource-agent";
+import { explain } from "../agents/explainability-agent";
 import { insertDecision } from "../db/bigquery-client";
+import { db } from "../db";
+import { decisions } from "../db/schema";
+import { eq } from "drizzle-orm";
 import { DecisionOutput } from "@/lib/types/agent-schemas";
+import { insertTimelineEntry } from "../db/bigquery-client";
+import crypto from "crypto";
 
 /**
  * Node: Ingestion
@@ -118,5 +124,53 @@ export async function reflectionNode(state: CityPulseState): Promise<Partial<Cit
 
   return {
     reflectionResult
+  };
+}
+
+/**
+ * Node: Explainability
+ * Generates a human-readable trace of the decision math.
+ */
+export async function explainabilityNode(state: CityPulseState): Promise<Partial<CityPulseState>> {
+  console.log(`[LangGraph] Running Explainability Node for zone: ${state.zone}`);
+  
+  if (!state.decisionResult || !state.forecastResult || !state.triageResult || !state.resourceResult || !state.reflectionResult) {
+    throw new Error("Missing required state for Explainability Node");
+  }
+
+  const decisionId = (state.decisionResult as any).id;
+  if (!decisionId) {
+    throw new Error("Decision ID is missing from state");
+  }
+
+  const explainabilityResult = await explain(
+    state.forecastResult,
+    state.triageResult,
+    state.resourceResult,
+    state.decisionResult,
+    state.reflectionResult,
+    state.zone
+  );
+
+  // Save the trace report to the decision record in the database
+  await db.update(decisions)
+    .set({ traceReport: explainabilityResult.trace_report })
+    .where(eq(decisions.id, decisionId));
+
+  await insertTimelineEntry({
+    id: crypto.randomUUID(),
+    agent_name: "reflection", // We'll log as reflection or create "explainability" if valid (Wait, AgentName type might not have it)
+    zone: state.zone,
+    timestamp: new Date().toISOString(),
+    action: `Generated Trace Report: ${explainabilityResult.trace_report.substring(0, 50)}...`,
+    input_ref: decisionId,
+    output_json: explainabilityResult as any,
+    conflict_flag: false,
+    escalation_flag: false,
+    confidence: 1.0,
+  });
+
+  return {
+    explainabilityResult
   };
 }

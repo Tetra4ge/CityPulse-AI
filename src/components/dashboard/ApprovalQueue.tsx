@@ -16,6 +16,7 @@ export function ApprovalQueue() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
   const [now, setNow] = useState<number>(Date.now());
+  const [rejectFeedback, setRejectFeedback] = useState<Record<string, string>>({});
 
   useEffect(() => {
     // Update 'now' every second for the escalation timer
@@ -54,7 +55,7 @@ export function ApprovalQueue() {
           decision_id: decisionId,
           approved,
           reviewer_id: "human_reviewer_01",
-          notes: approved ? "Approved for immediate dispatch" : "Rejected by human oversight",
+          notes: approved ? "Approved for immediate dispatch" : (rejectFeedback[decisionId] || "Rejected by human oversight"),
         }),
       });
 
@@ -185,22 +186,39 @@ export function ApprovalQueue() {
               </ul>
             </div>
 
+            {/* Explainability Trace */}
+            {item.decision.trace_report && (
+              <div className="bg-cp-bg-surface border border-cp-border-subtle p-2">
+                <span className="text-cp-accent-primary text-[10px] uppercase font-bold block mb-1">AI Explainability Trace</span>
+                <p className="text-cp-text-primary text-xs leading-relaxed italic border-l-2 border-cp-accent-primary pl-2">{item.decision.trace_report}</p>
+              </div>
+            )}
+
             {/* Actions */}
-            <div className="flex gap-3 mt-2">
-              <button 
-                onClick={() => handleAction(item.decision.id, true)}
-                disabled={processing === item.decision.id}
-                className="flex-1 bg-cp-risk-low hover:bg-opacity-80 text-cp-bg-base font-bold text-xs py-2 transition-colors uppercase tracking-wider disabled:opacity-50"
-              >
-                {processing === item.decision.id ? "Processing..." : "Approve & Dispatch"}
-              </button>
-              <button 
-                onClick={() => handleAction(item.decision.id, false)}
-                disabled={processing === item.decision.id}
-                className="flex-1 bg-transparent border border-cp-risk-severe text-cp-risk-severe hover:bg-cp-risk-severe hover:text-cp-bg-base font-bold text-xs py-2 transition-colors uppercase tracking-wider disabled:opacity-50"
-              >
-                Reject
-              </button>
+            <div className="flex flex-col gap-2 mt-2">
+              <textarea 
+                placeholder="Optional feedback (required for rejection to teach the AI)" 
+                className="bg-cp-bg-base border border-cp-border-subtle p-2 text-[10px] w-full resize-none h-12 text-cp-text-primary outline-none focus:border-cp-text-secondary"
+                value={rejectFeedback[item.decision.id] || ""}
+                onChange={e => setRejectFeedback({...rejectFeedback, [item.decision.id]: e.target.value})}
+              />
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => handleAction(item.decision.id, true)}
+                  disabled={processing === item.decision.id}
+                  className="flex-1 bg-cp-risk-low hover:bg-opacity-80 text-cp-bg-base font-bold text-xs py-2 transition-colors uppercase tracking-wider disabled:opacity-50"
+                >
+                  {processing === item.decision.id ? "Processing..." : "Approve"}
+                </button>
+                <button 
+                  onClick={() => handleAction(item.decision.id, false)}
+                  disabled={processing === item.decision.id || !rejectFeedback[item.decision.id]}
+                  className="flex-1 bg-transparent border border-cp-risk-severe text-cp-risk-severe hover:bg-cp-risk-severe hover:text-cp-bg-base font-bold text-xs py-2 transition-colors uppercase tracking-wider disabled:opacity-50"
+                  title={!rejectFeedback[item.decision.id] ? "Provide feedback to reject" : ""}
+                >
+                  Reject
+                </button>
+              </div>
             </div>
 
           </div>

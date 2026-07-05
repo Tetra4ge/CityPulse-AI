@@ -158,6 +158,16 @@ export interface ReflectionOutput {
   _mock?: boolean;
 }
 
+/**
+ * Explainability Agent output (TRD §2.7 - New)
+ * Generates a human-readable trace of the decision math.
+ */
+export interface ExplainabilityOutput {
+  trace_report: string;
+  key_metrics: string[];
+  _mock?: boolean;
+}
+
 // =============================================================================
 // API-specific types (ENDPOINT_OVERVIEW.md)
 // =============================================================================
@@ -202,7 +212,7 @@ export interface ApprovalRequest {
  * Approval record (paired decision + reflection for pending list)
  */
 export interface ApprovalPendingItem {
-  decision: DecisionOutput & { id: string; generated_at: string };
+  decision: DecisionOutput & { id: string; generated_at: string; trace_report?: string | null };
   reflection: ReflectionOutput;
   _mock?: boolean;
 }

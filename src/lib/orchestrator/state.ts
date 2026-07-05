@@ -5,7 +5,8 @@ import type {
   ForecastOutput, 
   DecisionOutput, 
   ReflectionOutput,
-  ResourceOutput
+  ResourceOutput,
+  ExplainabilityOutput
 } from "@/lib/types/agent-schemas";
 
 /**
@@ -42,6 +43,10 @@ export const CityPulseStateAnnotation = Annotation.Root({
     default: () => null,
     reducer: (oldState, newState) => newState ?? oldState
   }),
+  explainabilityResult: Annotation<ExplainabilityOutput | null>({
+    default: () => null,
+    reducer: (oldState, newState) => newState ?? oldState
+  })
 });
 
 /**

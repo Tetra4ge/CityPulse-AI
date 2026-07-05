@@ -4,8 +4,6 @@ import { db } from "../db";
 import { hospitalStatus, transitStatus } from "../db/schema";
 import { eq } from "drizzle-orm";
 
-import { eq } from "drizzle-orm";
-
 export async function resource(forecastResult: ForecastOutput, zone: string): Promise<ResourceOutput> {
   console.log(`[Resource Agent] Starting resource analysis for zone: ${zone}`);
 
@@ -80,6 +78,13 @@ export async function resource(forecastResult: ForecastOutput, zone: string): Pr
     };
   } catch (err) {
     console.error("Gemini failed to generate resource output:", err);
-    throw err;
+    // Fallback if API fails (rate limits)
+    return {
+      resource_risk_score: 0.8,
+      bottlenecks: [`hospital_beds_${zone.toLowerCase()}`],
+      analysis: "[Fallback Analysis] Gemini quota exceeded. Assuming critical resource bottleneck for safety.",
+      data_stale: dataStale,
+      _mock: true
+    };
   }
 }
