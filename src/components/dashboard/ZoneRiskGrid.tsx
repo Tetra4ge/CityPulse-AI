@@ -17,18 +17,18 @@ export function ZoneRiskGrid() {
     // Let's use pending approvals to get the latest state of each zone
     async function fetchZones() {
       try {
-        const res = await fetch("/api/approval/pending");
+        const res = await fetch("/api/decision/latest");
         if (!res.ok) return;
         const data = await res.json();
         
-        // Extract unique zones from pending decisions
+        // Extract unique zones from latest decisions
         const uniqueZones = new Map<string, ZoneData>();
         data.forEach((item: any) => {
-          if (!uniqueZones.has(item.decision.zone)) {
-            uniqueZones.set(item.decision.zone, {
-              zone: item.decision.zone,
-              risk_level: item.decision.risk_level,
-              overall_confidence: item.decision.overall_confidence
+          if (!uniqueZones.has(item.zone)) {
+            uniqueZones.set(item.zone, {
+              zone: item.zone,
+              risk_level: item.risk_level,
+              overall_confidence: item.overall_confidence
             });
           }
         });
