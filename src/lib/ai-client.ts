@@ -50,10 +50,19 @@ export async function generateContent(
   }
 
   if (provider === "openrouter") {
-    return generateWithOpenRouter(prompt, options);
+    try {
+      return await generateWithOpenRouter(prompt, options);
+    } catch (error) {
+      console.warn(`[AI Client] OpenRouter failed: ${(error as Error).message}. Falling back to Gemini...`);
+      if (process.env.GEMINI_API_KEY) {
+        return await generateWithGemini(prompt, options);
+      } else {
+        throw new Error(`OpenRouter failed and GEMINI_API_KEY is not set for fallback. Original error: ${(error as Error).message}`);
+      }
+    }
   }
 
-  return generateWithGemini(prompt, options);
+  return await generateWithGemini(prompt, options);
 }
 
 /**
