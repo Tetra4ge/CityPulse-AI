@@ -6,10 +6,11 @@ Built for the Gen AI Academy APAC Edition — Challenge Track 2: Autonomous Mult
 
 ## Current Status
 
-**Fully Operational (Phases 1-7 Completed).** The system is now a working end-to-end multi-agent pipeline. 
-- The React "Mission Control" dashboard is live and wired to all backend API routes.
+**Fully Operational (Phases 1-5 Completed).** The system is now a working end-to-end multi-agent pipeline. 
+- The React "Mission Control" dashboard is live and wired to all backend API routes, with dynamically resizing columns for better visibility of Agent Activity and Human Approval.
 - The Python GPU service is complete (with cuDF/cuML and a CPU fallback).
 - The full LangGraph workflow (Ingestion → Forecast/Triage → Decision → Reflection → Human Approval → Notification) is successfully implemented and tested.
+- **Robust AI Integration:** Gemini is now lazy-loaded dynamically in all agents, perfectly integrating with Next.js App Router and preventing caching bugs.
 
 ## Documentation
 

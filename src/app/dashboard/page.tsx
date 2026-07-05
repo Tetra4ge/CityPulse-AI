@@ -66,7 +66,7 @@ export default function DashboardPage() {
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-cp-4 min-h-0">
           
           {/* Left Column: Risk & Trends */}
-          <div className="lg:col-span-4 flex flex-col gap-cp-4 min-h-0">
+          <div className="lg:col-span-3 flex flex-col gap-cp-4 min-h-0">
             <div className="flex-1 min-h-0">
               <ZoneRiskGrid />
             </div>
@@ -76,7 +76,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Middle Column: Agent Timeline */}
-          <div className="lg:col-span-4 min-h-0 flex flex-col gap-cp-4">
+          <div className="lg:col-span-6 min-h-0 flex flex-col gap-cp-4">
             <ApprovalQueue />
             <div className="flex-1 min-h-0">
               <AgentTimeline zone={selectedZone} />
@@ -84,7 +84,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Right Column: What-If Simulation & Benchmark */}
-          <div className="lg:col-span-4 min-h-0 flex flex-col gap-cp-4">
+          <div className="lg:col-span-3 min-h-0 flex flex-col gap-cp-4">
             <div className="flex-1 min-h-0">
               <WhatIfSimulation zone={selectedZone} />
             </div>

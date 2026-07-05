@@ -100,7 +100,7 @@ export function ApprovalQueue() {
         <span className="bg-cp-risk-high text-cp-bg-base px-2 py-0.5 rounded-full">{pendingItems.length} Pending</span>
       </h2>
       
-      <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+      <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
         {/* Tier 2.2: Escalation sort. Unapproved severe items older than 30s go to the top */}
         {[...pendingItems].sort((a, b) => {
           const aAge = now - new Date(a.decision.generated_at).getTime();
