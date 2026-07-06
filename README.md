@@ -1,106 +1,123 @@
-# CityPulse AI
+<div align="center">
+  <img src="https://img.shields.io/badge/Status-Live_Deployment-success?style=for-the-badge" alt="Status" />
+  <h1>🏙️ CityPulse AI</h1>
+  <p><strong>Multi-Agent Decision Intelligence Platform for Urban Health Risk Management</strong></p>
+  
+  <p>
+    <img src="https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js" />
+    <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" />
+    <img src="https://img.shields.io/badge/Google_Cloud-4285F4?style=flat-square&logo=google-cloud&logoColor=white" alt="GCP" />
+    <img src="https://img.shields.io/badge/NVIDIA_RAPIDS-76B900?style=flat-square&logo=nvidia&logoColor=white" alt="NVIDIA" />
+    <img src="https://img.shields.io/badge/Gemini_2.0-8E75B2?style=flat-square&logo=googlebard&logoColor=white" alt="Gemini" />
+    <img src="https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite" />
+    <img src="https://img.shields.io/badge/Drizzle-C5F74F?style=flat-square&logo=drizzle&logoColor=black" alt="Drizzle ORM" />
+  </p>
+</div>
 
-**Multi-agent decision intelligence platform for urban health risk.** CityPulse AI turns raw air quality, weather, and citizen complaint signals into a single, human-approved municipal action — not just a number on a dashboard. It is built as a society of cooperating agents (Ingestion, Forecast, Triage, Decision, Reflection, Notification) that negotiate, disagree, and converge on recommendations, with a human always in the loop before any action is dispatched.
+---
 
-Built for the Gen AI Academy APAC Edition — Challenge Track 2: Autonomous Multi-Agent System (sponsored by NVIDIA).
+## 🏆 Hackathon Submission
 
-## Current Status
+* **Hackathon:** [Google Gen AI Academy - APAC Edition (Cohort 2)](https://hack2skill.com/event/apac-genaiacademy)
+* **Track:** Challenge Track 2: Autonomous Multi-Agent System (NVIDIA Sponsored)
+* **Problem Statement:** Creating a resilient, multi-agent AI framework that ingests urban signals to intelligently forecast, triage, and resolve municipal health risks with human-in-the-loop oversight.
 
-**Fully Operational (Phases 1-5 Completed).** The system is now a working end-to-end multi-agent pipeline. 
-- The React "Mission Control" dashboard is live and wired to all backend API routes, with dynamically resizing columns for better visibility of Agent Activity and Human Approval.
-- The Python GPU service is complete (with cuDF/cuML and a CPU fallback).
-- The full LangGraph workflow (Ingestion → Forecast/Triage → Decision → Reflection → Human Approval → Notification) is successfully implemented and tested.
-- **Robust AI Integration:** Gemini is now lazy-loaded dynamically in all agents, perfectly integrating with Next.js App Router and preventing caching bugs.
+---
 
-## Documentation
+## 🧠 What is CityPulse AI?
 
-All project reference documents are in [`/docs`](./docs):
+CityPulse AI is a **live, multi-agent oversight platform** designed for municipal crisis management. It transforms raw, chaotic urban signals—such as live air quality fluctuations, weather changes, and localized citizen complaints—into prioritized, human-approved municipal actions.
 
-- [`01_OVERVIEW.md`](./docs/01_OVERVIEW.md) — Project theme and rationale
-- [`02_PRD.md`](./docs/02_PRD.md) — Product requirements
-- [`03_TRD.md`](./docs/03_TRD.md) — Technical requirements and agent schemas
-- [`04_ARCHITECTURE.md`](./docs/04_ARCHITECTURE.md) — System architecture and data flow
-- [`05_TECH_STACK.md`](./docs/05_TECH_STACK.md) — Google Cloud + NVIDIA tool mapping
-- [`skills.md`](./docs/skills.md) — UI design system and behavioral guardrails
+Rather than just displaying numbers on a dashboard, CityPulse AI operates as a **society of cooperating AI agents**. These agents ingest data, run predictive GPU-accelerated simulations, triage incidents, debate mitigation strategies, and present a final, robust recommendation to human operators.
 
-## Mentor Guidelines & Sprint Plan
+## ❓ Why This?
 
-Based on the mentor's guidelines, this project follows a strict **5-Day Sprint Plan** combined with a robust **"Mission Control"** UI philosophy:
-*   **Sprint Plan:** Development is broken down into a structured 5-day sprint mapping to 7 core phases, fully detailed in [`/Phases/00_INDEX.md`](./Phases/00_INDEX.md).
-*   **UI/UX Aesthetic:** The frontend avoids playful designs in favor of a "Mission Control" vibe (dark mode, strict 4-color risk scale, mono font for data) to present a serious, data-dense decision interface. (Detailed in Phase 5 documentation).
+Modern cities generate massive amounts of data, but municipal decision-makers suffer from "alert fatigue." When an environmental crisis (like an industrial fire causing severe AQI spikes) occurs, operators don't need more data—they need **actionable intelligence**. 
 
-## Setup
+CityPulse AI bridges the gap between raw data and municipal action by automating the heavy lifting of data correlation, forecasting, and policy checking, while keeping a **human firmly in the loop** for final approval.
 
-### Prerequisites
+## ⚙️ How it Works
 
-- Node.js 18+ and npm
-- No cloud credentials needed for Phase 0 (everything is stubbed/mocked)
+The system operates via a continuous, stateful pipeline (powered by LangGraph principles):
 
-### Install and run
+1. **Ingestion:** Constantly monitors AQI, Weather, and citizen reports.
+2. **GPU Forecasting & Triage:** Uses NVIDIA GPU-accelerated DBSCAN clustering and Linear Regression to predict hazard spread and identify hotspots.
+3. **Decision & Reflection:** AI agents debate the best course of action based on historical precedents and municipal guidelines. If a decision is too risky, the Reflection Agent flags it.
+4. **Human Oversight:** The proposed action is queued in the "Mission Control" dashboard. A human operator approves or rejects it (with feedback to train the AI).
+5. **Notification:** Once approved, alerts are dispatched to relevant municipal departments or citizens.
+
+---
+
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    subgraph Data Sources
+        AQ[AQI Sensors] --> IA[Ingestion Agent]
+        WE[Weather API] --> IA
+        CR[Citizen Complaints] --> IA
+    end
+
+    subgraph AI Orchestration Layer Next.js
+        IA --> GPU[GPU Service FastAPI]
+        GPU -->|Clustering & Forecast| TA[Triage Agent]
+        TA --> DA[Decision Agent]
+        DA --> RA[Reflection Agent]
+    end
+
+    subgraph Human-in-the-Loop
+        RA -->|High Confidence| DB[(CityPulse DB)]
+        RA -->|Low Confidence / High Risk| HQ[Human Approval Queue]
+        HQ -->|Approve/Reject| DB
+    end
+    
+    subgraph Action
+        DB --> NA[Notification Agent]
+        NA --> EMS[EMS / Fire Dept / Public]
+    end
+```
+
+---
+
+## 💻 Tech Stack
+
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend** | ![Next.js](https://img.shields.io/badge/Next.js-black?style=flat&logo=next.js&logoColor=white) | React App Router, Tailwind CSS, Recharts |
+| **Backend AI** | ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white) | Python backend for heavy numerical compute |
+| **GPU Compute**| ![NVIDIA](https://img.shields.io/badge/RAPIDS-76B900?style=flat&logo=nvidia&logoColor=white) | cuDF, cuML for DBSCAN clustering & forecasting |
+| **LLM Engine** | ![Gemini](https://img.shields.io/badge/Gemini_2.0-8E75B2?style=flat&logo=googlebard&logoColor=white) | Agent reasoning, negotiation, and reflection |
+| **Database** | ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat&logo=sqlite&logoColor=white) | Drizzle ORM (Development/Hackathon database) |
+| **Deployment** | ![GCP](https://img.shields.io/badge/Google_Cloud-4285F4?style=flat&logo=googlecloud&logoColor=white) | Single VM architecture for ultra-low latency |
+
+---
+
+## 🚀 Quick Setup (Local Dev)
 
 ```bash
-# Clone the repository
-git clone <repo-url>
+# 1. Clone & Install
+git clone https://github.com/Tetra4ge/CityPulse-AI.git
 cd CityPulse-AI
-
-# Install dependencies
 npm install
 
-# Start the development server
-npm run dev
-```
-
-The app will be available at [http://localhost:3000](http://localhost:3000).
-
-### Environment variables
-
-Copy `.env.example` to `.env.local`:
-
-```bash
+# 2. Setup Environment
 cp .env.example .env.local
+# Add your Gemini/OpenRouter API Keys
+
+# 3. Start Frontend
+npm run dev
+
+# 4. Start GPU Service (Separate Terminal)
+cd gpu-service
+pip install -r requirements.txt
+uvicorn main:app --reload
 ```
 
-No env vars are required for Phase 0. Each variable in `.env.example` is annotated with the phase it becomes required.
+---
 
-### Available scripts
-
-| Script | Description |
-|---|---|
-| `npm run dev` | Start Next.js development server |
-| `npm run build` | Build for production |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
-| `npm run type-check` | Run TypeScript compiler check |
-
-## Project Structure
-
-```
-citypulse-ai/
-├── docs/              # All project reference documents
-├── src/
-│   ├── app/           # Next.js App Router pages and API routes
-│   │   ├── api/       # 13 API route stubs (mock data)
-│   │   ├── dashboard/ # Dashboard page (Phase 4-5)
-│   │   └── ...        # Root layout and landing page
-│   ├── components/    # React components (ui/, agents/, dashboard/)
-│   ├── lib/
-│   │   ├── agents/    # Agent function stubs (6 agents)
-│   │   ├── db/        # BigQuery client stub + SQL DDL schema files
-│   │   ├── types/     # TypeScript type definitions
-│   │   └── orchestrator.ts
-│   └── styles/        # Additional stylesheets
-├── gpu-service/       # Python cuDF/cuML service (Phase 2)
-└── ...                # Config files (tailwind, tsconfig, eslint, etc.)
-```
-
-## Tech Stack
-
-- **Frontend:** Next.js (App Router), TypeScript, Tailwind CSS
-- **Backend:** Next.js API Routes (Phase 0-1), FastAPI GPU service (Phase 2+)
-- **Database:** BigQuery (production), local SQLite (development)
-- **AI/ML:** Gemini (via Vertex AI), cudf.pandas, cuML (NVIDIA RAPIDS)
-- **Cloud:** Google Cloud (BigQuery, Cloud Storage, Vertex AI, Looker)
-
-## License
-
-See [LICENSE](./LICENSE) for details.
+<div align="center">
+  <p>Built with ❤️ by <strong>Team TetraFourge</strong></p>
+  <a href="https://github.com/Tetra4ge">
+    <img src="https://img.shields.io/badge/GitHub-Tetra4ge-181717?style=for-the-badge&logo=github&logoColor=white" alt="Tetra4ge GitHub" />
+  </a>
+</div>
