@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ZoneRiskGrid } from "@/components/dashboard/ZoneRiskGrid";
 import { HistoricalTrends } from "@/components/dashboard/HistoricalTrends";
@@ -10,28 +10,30 @@ import { WhatIfSimulation } from "@/components/dashboard/WhatIfSimulation";
 import { ApprovalQueue } from "@/components/dashboard/ApprovalQueue";
 import { AccelerationBenchmark } from "@/components/dashboard/AccelerationBenchmark";
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
   const [selectedZone, setSelectedZone] = useState("Delhi");
   const [isLocating, setIsLocating] = useState(false);
   const [customCoords, setCustomCoords] = useState<{lat: number, lng: number} | null>(null);
 
+  // Sync state whenever URL parameters change
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const zone = params.get("zone");
-      const latStr = params.get("lat");
-      const lngStr = params.get("lng");
+    const zone = searchParams.get("zone");
+    const latStr = searchParams.get("lat");
+    const lngStr = searchParams.get("lng");
 
-      if (latStr && lngStr) {
-        setCustomCoords({ lat: parseFloat(latStr), lng: parseFloat(lngStr) });
-      }
-
-      if (zone) {
-        setSelectedZone(zone);
-      }
+    if (latStr && lngStr) {
+      setCustomCoords({ lat: parseFloat(latStr), lng: parseFloat(lngStr) });
+    } else {
+      setCustomCoords(null);
     }
-  }, []);
+
+    if (zone) {
+      setSelectedZone(zone);
+    }
+  }, [searchParams]);
 
   const handleUseMyLocation = () => {
     setIsLocating(true);
@@ -40,14 +42,11 @@ export default function DashboardPage() {
         async (position) => {
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
-          setCustomCoords({ lat, lng });
-          setSelectedZone("Custom");
           
-          // Auto-trigger the pipeline in the background
           try {
             await fetch(`/api/orchestrator/run?zone=Custom&lat=${lat}&lng=${lng}`);
-            // Refresh the server components to show the newly ingested data
-            router.refresh();
+            // Explicitly route to update URL
+            router.push(`/dashboard?zone=Custom&lat=${lat}&lng=${lng}`);
           } catch (error) {
             console.error("Auto-trigger failed:", error);
           } finally {
@@ -67,12 +66,12 @@ export default function DashboardPage() {
   };
 
   const handleZoneChange = async (newZone: string) => {
-    setSelectedZone(newZone);
     setIsLocating(true);
     
     try {
       await fetch(`/api/orchestrator/run?zone=${newZone}`);
-      router.refresh();
+      // Push new route without lat/lng params so we don't carry over custom coords to standard cities
+      router.push(`/dashboard?zone=${newZone}`);
     } catch (error) {
       console.error("Auto-trigger failed:", error);
     } finally {
@@ -181,5 +180,17 @@ export default function DashboardPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-cp-bg-base flex flex-col items-center justify-center">
+        <div className="text-cp-accent-primary font-mono animate-pulse">⏳ Initializing Mission Control...</div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }
