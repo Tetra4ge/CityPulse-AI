@@ -1,6 +1,6 @@
 <div align="center">
   <img src="https://img.shields.io/badge/Status-Live_Deployment-success?style=for-the-badge" alt="Status" />
-  <h1>🏙️ CityPulse AI</h1>
+  <h1>CityPulse AI</h1>
   <p><strong>Multi-Agent Decision Intelligence Platform for Urban Health Risk Management</strong></p>
   
   <p>
@@ -116,7 +116,7 @@ uvicorn main:app --reload
 ---
 
 <div align="center">
-  <p>Built with ❤️ by <strong>Team TetraFourge</strong></p>
+  <p>Built by <strong>Team TetraFourge</strong></p>
   <a href="https://github.com/Tetra4ge">
     <img src="https://img.shields.io/badge/GitHub-Tetra4ge-181717?style=for-the-badge&logo=github&logoColor=white" alt="Tetra4ge GitHub" />
   </a>
