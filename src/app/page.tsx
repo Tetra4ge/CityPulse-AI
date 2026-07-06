@@ -72,7 +72,7 @@ export default function Home() {
 
             <h1 className="text-4xl md:text-6xl font-mono uppercase font-bold text-cp-text-primary tracking-tighter leading-tight">
               CityPulse AI <br />
-              <span className="text-cp-accent-primary">Core Orchestrator</span>
+              <span className="text-cp-accent-primary">Urban Defense Grid</span>
             </h1>
 
             <p className="text-cp-h2 font-sans text-cp-text-secondary max-w-xl leading-relaxed">
@@ -132,8 +132,8 @@ export default function Home() {
               <p> Establishing CUDA GPU connections... <span className="text-cp-risk-low">SUCCESS</span></p>
               <p> Ingestion Agent active: <span className="text-cp-risk-medium">Monitoring AQI</span></p>
               <p> Triage Agent active: <span className="text-cp-risk-medium">Parsing citizen signals</span></p>
-              <p> LangGraph Checkpointers initialized.</p>
-              <p className="animate-pulse"> Waiting for manual override...</p>
+              <p> DB Cache TTL Engine initialized <span className="text-cp-risk-low">(10 min ruleset)</span>.</p>
+              <p className="animate-pulse"> Awaiting zone selection for live analysis...</p>
             </div>
           </div>
         </div>
@@ -251,6 +251,10 @@ export default function Home() {
                   <div>
                     <h4 className="text-cp-h3 font-mono text-cp-text-primary uppercase">3. Autonomous Action</h4>
                     <p className="text-cp-micro font-sans text-cp-text-secondary mt-1">Drafting emergency orders, dispatching medical alerts, and rerouting traffic.</p>
+                  </div>
+                  <div>
+                    <h4 className="text-cp-h3 font-mono text-cp-text-primary uppercase">4. Smart Caching Layer</h4>
+                    <p className="text-cp-micro font-sans text-cp-text-secondary mt-1">Dynamic 10-minute DB cache prevents redundant LangGraph triggers while maintaining strict real-time accuracy.</p>
                   </div>
                 </div>
               </div>
