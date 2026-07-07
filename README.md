@@ -9,7 +9,9 @@
     <img src="https://img.shields.io/badge/Google_Cloud-4285F4?style=flat-square&logo=google-cloud&logoColor=white" alt="GCP" />
     <img src="https://img.shields.io/badge/NVIDIA_RAPIDS-76B900?style=flat-square&logo=nvidia&logoColor=white" alt="NVIDIA" />
     <img src="https://img.shields.io/badge/OpenRouter-1A1A1A?style=flat-square&logo=openaq&logoColor=white" alt="OpenRouter" />
-    <img src="https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite" />
+    <img src="https://img.shields.io/badge/LangChain-1C3C3C?style=flat-square&logo=langchain&logoColor=white" alt="LangChain" />
+    <img src="https://img.shields.io/badge/LangGraph-000000?style=flat-square&logo=langchain&logoColor=white" alt="LangGraph" />
+    <img src="https://img.shields.io/badge/Turso-4EE7AD?style=flat-square&logo=sqlite&logoColor=black" alt="Turso" />
     <img src="https://img.shields.io/badge/Drizzle-C5F74F?style=flat-square&logo=drizzle&logoColor=black" alt="Drizzle ORM" />
   </p>
 </div>
@@ -86,9 +88,10 @@ graph TD
 | **Frontend** | ![Next.js](https://img.shields.io/badge/Next.js-black?style=flat&logo=next.js&logoColor=white) | React App Router, Tailwind CSS, Recharts |
 | **Backend AI** | ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white) | Python backend for heavy numerical compute |
 | **GPU Compute**| ![NVIDIA](https://img.shields.io/badge/RAPIDS-76B900?style=flat&logo=nvidia&logoColor=white) | cuDF, cuML for DBSCAN clustering & forecasting |
-| **LLM Engine** | ![OpenRouter](https://img.shields.io/badge/OpenRouter-1A1A1A?style=flat&logo=openaq&logoColor=white) | Agent reasoning, negotiation, and reflection |
-| **Database** | ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat&logo=sqlite&logoColor=white) | Drizzle ORM (Development/Hackathon database) |
-| **Deployment** | ![GCP](https://img.shields.io/badge/Google_Cloud-4285F4?style=flat&logo=googlecloud&logoColor=white) | Single VM architecture for ultra-low latency |
+| **AI Framework** | ![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=flat) ![LangGraph](https://img.shields.io/badge/LangGraph-000000?style=flat) | Multi-agent orchestration, tools, and reflection loops |
+| **LLM Engine** | ![OpenRouter](https://img.shields.io/badge/OpenRouter-1A1A1A?style=flat&logo=openaq&logoColor=white) | Agent reasoning and negotiation |
+| **Database** | ![Turso](https://img.shields.io/badge/Turso-4EE7AD?style=flat&logo=sqlite&logoColor=black) | Serverless SQLite Database via Drizzle ORM |
+| **Deployment** | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white) ![GCP](https://img.shields.io/badge/Google_Cloud-4285F4?style=flat&logo=googlecloud&logoColor=white) | Next.js Frontend on Vercel, Python GPU API on GCP |
 
 ---
 

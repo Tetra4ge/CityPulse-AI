@@ -73,13 +73,18 @@ export async function saveRawPayload(
     });
     return `gs://${bucketName}/${key}`;
   } else {
-    const dir = path.join(process.cwd(), "data", "raw-ingestion", source);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    try {
+      const dir = path.join(process.cwd(), "data", "raw-ingestion", source);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      const filePath = path.join(dir, `${safeTimestamp}_${zone.replace(/\s+/g, "_")}.json`);
+      fs.writeFileSync(filePath, payloadStr, "utf8");
+      return `file:///${filePath.replace(/\\/g, "/")}`;
+    } catch (error) {
+      console.warn("Vercel Serverless environment detected. Skipping local file write.");
+      return `ephemeral://${source}/${safeTimestamp}_${zone}.json`;
     }
-    const filePath = path.join(dir, `${safeTimestamp}_${zone.replace(/\s+/g, "_")}.json`);
-    fs.writeFileSync(filePath, payloadStr, "utf8");
-    return `file:///${filePath.replace(/\\/g, "/")}`;
   }
 }
 
