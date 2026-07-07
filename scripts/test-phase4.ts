@@ -15,9 +15,12 @@ async function runPhase4Tests() {
   const fakeTriage: TriageOutput = {
     zone: "Zone-D", complaint_count: 5, trend_vs_yesterday: "up", severity_signal: "high", hotspot_detected: false, summary: "Complaints incoming."
   };
+  const fakeResource = {
+    resource_risk_score: 0.8, bottlenecks: [], analysis: "Normal", data_stale: false
+  };
   
   console.log("1. Generating Decision Agent Output...");
-  const decision = await decide(fakeForecast, fakeTriage, "Zone-D");
+  const decision = await decide(fakeForecast, fakeTriage, fakeResource, "Zone-D");
   
   // Insert it manually so we can test the reflection/approval flows which rely on the DB
   const decisionId = await insertDecision({ ...decision });
