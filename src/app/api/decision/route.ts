@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { decide } from "@/lib/agents/decision-agent";
 import { forecast } from "@/lib/agents/forecast-agent";
 import { triage } from "@/lib/agents/triage-agent";
+import { resource } from "@/lib/agents/resource-agent";
 import { insertDecision } from "@/lib/db/bigquery-client";
 
 export async function GET(request: NextRequest) {
@@ -18,8 +19,11 @@ export async function GET(request: NextRequest) {
     // 2. Fetch latest triage
     const triageOutput = await triage(zone);
     
+    // 2.5 Fetch resources
+    const resourceOutput = await resource(forecastOutput, zone);
+    
     // 3. Synthesize decision
-    const decision = await decide(forecastOutput, triageOutput, zone, false);
+    const decision = await decide(forecastOutput, triageOutput, resourceOutput, zone, false);
     
     // 4. Save decision to bigquery/sqlite
     // The `decisions` table requires a generated_at timestamp

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decide } from "@/lib/agents/decision-agent";
+import { resource } from "@/lib/agents/resource-agent";
 import { sqlite } from "@/lib/db";
 import type { WhatIfRequest, WhatIfResult, ForecastOutput, TriageOutput } from "@/lib/types/agent-schemas";
 import { insertForecast } from "@/lib/db/bigquery-client"; // To save the what-if forecast
@@ -49,7 +50,8 @@ export async function POST(request: NextRequest) {
 
     // 4. Run the Decision Agent
     // We strictly use the REAL decide() logic here to ensure true multi-agent accuracy!
-    const decision = await decide(simulatedForecast, triageOutput, zone);
+    const resourceOutput = await resource(simulatedForecast, zone);
+    const decision = await decide(simulatedForecast, triageOutput, resourceOutput, zone);
     
     // CRITICAL: We DO NOT save this decision into the `decisions` table. 
     // It remains hypothetical.

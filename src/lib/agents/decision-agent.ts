@@ -266,7 +266,7 @@ export async function resolveConflict(
     zone,
     timestamp: new Date().toISOString(),
     action: `Fetched supplementary real-time AQI: ${(supplementaryAqi.payload as any).aqi_value}`,
-    input_ref: supplementaryAqi.payload.raw_payload_uri || null,
+    input_ref: (supplementaryAqi.payload as any).raw_payload_uri || null,
     output_json: supplementaryAqi as any,
     conflict_flag: false,
     escalation_flag: false,
