@@ -14,7 +14,7 @@ function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [selectedZone, setSelectedZone] = useState("Delhi");
+  const [selectedZone, setSelectedZone] = useState("");
   const [isLocating, setIsLocating] = useState(false);
   const [customCoords, setCustomCoords] = useState<{lat: number, lng: number} | null>(null);
 
@@ -66,6 +66,7 @@ function DashboardContent() {
   };
 
   const handleZoneChange = async (newZone: string) => {
+    if (!newZone) return;
     setIsLocating(true);
     
     try {
@@ -114,6 +115,7 @@ function DashboardContent() {
                 disabled={isLocating}
                 className="bg-cp-bg-surface border border-cp-border-subtle text-cp-text-primary px-3 py-1 font-mono text-xs outline-none focus:border-cp-text-secondary disabled:opacity-50"
               >
+                <option value="" disabled>Select a zone...</option>
                 <option value="Delhi">Delhi</option>
                 <option value="Mumbai">Mumbai</option>
                 <option value="Bangalore">Bangalore</option>
