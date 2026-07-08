@@ -193,7 +193,7 @@ def run_forecast(req: ForecastRequest):
         "execution_time_ms": (time.perf_counter() - start_time) * 1000
     }
 
-@web_app.get("/benchmark")
+@web_app.get("/benchmark", dependencies=[Depends(get_api_key)])
 def run_benchmark():
     import cudf.pandas
     cudf.pandas.install()

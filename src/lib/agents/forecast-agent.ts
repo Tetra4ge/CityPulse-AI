@@ -52,12 +52,16 @@ export async function forecastWhatIf(
   const isWhatIf = trafficMultiplier !== 1.0 || !!overrideFeatures;
 
   // 2. Call python FastAPI service
-  const pythonUrl = "http://127.0.0.1:8000/forecast";
+  const pythonUrl = `${process.env.NEXT_PUBLIC_GPU_SERVICE_URL || "http://127.0.0.1:8000"}/forecast`;
+  const apiKey = process.env.GPU_SERVICE_API_KEY || "";
   
   try {
     const res = await fetch(pythonUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "x-api-key": apiKey
+      },
       body: JSON.stringify({
         zone,
         traffic_multiplier: trafficMultiplier,
