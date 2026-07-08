@@ -15,10 +15,10 @@ import pandas as pd
 # Modal Configuration
 # =============================================================================
 
-# Build the custom Docker image for Modal
-# We install standard packages and then pull the NVIDIA RAPIDS packages
+# Build the Modal Image with dependencies
 image = (
-    modal.Image.debian_slim(python_version="3.10")
+    modal.Image.from_registry("nvidia/cuda:12.2.2-devel-ubuntu22.04", add_python="3.10")
+    .apt_install("libgomp1")
     .pip_install("fastapi", "uvicorn", "pydantic", "scikit-learn", "numpy", "pandas")
     .pip_install(
         "cudf-cu12==24.4.1",
@@ -98,8 +98,7 @@ def read_root():
 
 @web_app.post("/triage", dependencies=[Depends(get_api_key)])
 def run_triage(req: TriageRequest):
-    import cudf.pandas
-    cudf.pandas.install()
+    import cudf
     from cuml.cluster import DBSCAN
     
     if not req.complaints:
@@ -117,7 +116,7 @@ def run_triage(req: TriageRequest):
     start_time = time.perf_counter()
 
     # GPU Acceleration!
-    df = pd.DataFrame(coords_arr, columns=['lat', 'lng'])
+    df = cudf.DataFrame(coords_arr, columns=['lat', 'lng'])
     dbscan = DBSCAN(eps=eps, min_samples=min_samples)
     dbscan.fit(df)
     labels = dbscan.labels_.to_numpy()
@@ -137,8 +136,7 @@ def run_triage(req: TriageRequest):
 
 @web_app.post("/forecast", dependencies=[Depends(get_api_key)])
 def run_forecast(req: ForecastRequest):
-    import cudf.pandas
-    cudf.pandas.install()
+    import cudf
     from cuml.linear_model import LinearRegression
     
     start_time = time.perf_counter()
@@ -173,14 +171,14 @@ def run_forecast(req: ForecastRequest):
     y_arr = np.array(y_data, dtype=np.float32)
 
     # GPU Acceleration!
-    X_df = pd.DataFrame(X_arr)
-    y_df = pd.Series(y_arr)
+    X_df = cudf.DataFrame(X_arr)
+    y_df = cudf.Series(y_arr)
     model = LinearRegression()
     model.fit(X_df, y_df)
     
     latest_features = np.array([[aqi_values[-1], weather_temps[-1], weather_hums[-1], weather_winds[-1]]], dtype=np.float32)
-    latest_df = pd.DataFrame(latest_features)
-    pred = model.predict(latest_df).to_numpy()[0]
+    latest_df = cudf.DataFrame(latest_features)
+    pred = model.predict(latest_df)[0].item()
 
     predicted_aqi = pred * (1.0 + (req.traffic_multiplier - 1.0) * 0.3)
     predicted_aqi = max(0, min(500, round(predicted_aqi)))
@@ -195,13 +193,12 @@ def run_forecast(req: ForecastRequest):
 
 @web_app.get("/benchmark", dependencies=[Depends(get_api_key)])
 def run_benchmark():
-    import cudf.pandas
-    cudf.pandas.install()
+    import cudf
     from cuml.cluster import DBSCAN as cumlDBSCAN
     from sklearn.cluster import DBSCAN as cpuDBSCAN
     
-    size = 50000
-    dummy_coords = np.random.rand(size, 2).astype(np.float32)
+    size = 15000
+    dummy_coords = np.random.uniform(-90.0, 90.0, (size, 2)).astype(np.float32)
 
     # CPU Run
     start_cpu = time.perf_counter()
@@ -211,7 +208,7 @@ def run_benchmark():
 
     # GPU Run
     start_gpu = time.perf_counter()
-    df = pd.DataFrame(dummy_coords, columns=['lat', 'lng'])
+    df = cudf.DataFrame(dummy_coords, columns=['lat', 'lng'])
     gpu_db = cumlDBSCAN(eps=0.01, min_samples=5)
     gpu_db.fit(df)
     gpu_time = (time.perf_counter() - start_gpu) * 1000
