@@ -38,6 +38,10 @@ Modern cities generate massive amounts of data, but municipal decision-makers su
 
 CityPulse AI bridges the gap between raw data and municipal action by automating the heavy lifting of data correlation, forecasting, and policy checking, while keeping a **human firmly in the loop** for final approval.
 
+## 📊 Live GPU Dashboard
+
+![Dashboard showing GPU Performance](images/gpu.png)
+
 ## ⚙️ How it Works
 
 The system operates via a continuous, stateful pipeline (powered by LangGraph principles):
@@ -91,7 +95,7 @@ graph TD
 | **AI Framework** | ![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=flat) ![LangGraph](https://img.shields.io/badge/LangGraph-000000?style=flat) | Multi-agent orchestration, tools, and reflection loops |
 | **LLM Engine** | ![OpenRouter](https://img.shields.io/badge/OpenRouter-1A1A1A?style=flat&logo=openaq&logoColor=white) | Agent reasoning and negotiation |
 | **Database** | ![Turso](https://img.shields.io/badge/Turso-4EE7AD?style=flat&logo=sqlite&logoColor=black) | Serverless SQLite Database via Drizzle ORM |
-| **Deployment** | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white) ![GCP](https://img.shields.io/badge/Google_Cloud-4285F4?style=flat&logo=googlecloud&logoColor=white) | Next.js Frontend on Vercel, Python GPU API on GCP |
+| **Deployment** | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white) ![Modal](https://img.shields.io/badge/Modal-000000?style=flat&logo=modal&logoColor=white) | Next.js Frontend on Vercel, Python GPU API on Modal (Serverless NVIDIA T4) |
 
 ---
 
@@ -107,13 +111,26 @@ npm install
 cp .env.example .env.local
 # Add your Gemini/OpenRouter API Keys
 
-# 3. Start Frontend
-npm run dev
-
-# 4. Start GPU Service (Separate Terminal)
+# 3. Deploy GPU Service to Modal
 cd gpu-service
 pip install -r requirements.txt
-uvicorn main:app --reload
+modal setup  # Authenticate with Modal
+modal deploy main.py  # Deploys to a Serverless NVIDIA T4 GPU
+
+# 4. Setup Frontend Environment
+cd ..
+cp .env.example .env
+
+# --- LLM API Keys ---
+# OPENROUTER_API_KEY="your-openrouter-key-here"
+# GEMINI_API_KEY="your-gemini-api-key-here"
+# TURSO_DATABASE_URL="libsql://your-database-url.turso.io"
+# TURSO_AUTH_TOKEN="your-turso-auth-token"
+# NEXT_PUBLIC_GPU_SERVICE_URL="https://your-app-name.modal.run"
+# GPU_SERVICE_API_KEY="your-gpu-service-api-key"
+
+# 5. Start Frontend
+npm run dev
 ```
 
 ---
