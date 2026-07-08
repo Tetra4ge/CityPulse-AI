@@ -9,14 +9,16 @@ import { AgentTimeline } from "@/components/dashboard/AgentTimeline";
 import { WhatIfSimulation } from "@/components/dashboard/WhatIfSimulation";
 import { ApprovalQueue } from "@/components/dashboard/ApprovalQueue";
 import { AccelerationBenchmark } from "@/components/dashboard/AccelerationBenchmark";
+import { InfoModal } from "@/components/dashboard/InfoModal";
 
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [selectedZone, setSelectedZone] = useState("Delhi");
+  const [selectedZone, setSelectedZone] = useState("");
   const [isLocating, setIsLocating] = useState(false);
   const [customCoords, setCustomCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
 
   // Sync state whenever URL parameters change
   useEffect(() => {
@@ -66,6 +68,7 @@ function DashboardContent() {
   };
 
   const handleZoneChange = async (newZone: string) => {
+    if (!newZone) return;
     setIsLocating(true);
     
     try {
@@ -97,8 +100,15 @@ function DashboardContent() {
               <h1 className="text-cp-h1 font-medium font-mono uppercase tracking-widest text-cp-text-primary">
                 Mission Control
               </h1>
-              <p className="text-cp-micro text-cp-text-secondary font-mono">
+              <p className="text-cp-micro text-cp-text-secondary font-mono flex items-center gap-2">
                 CityPulse AI · Live Multi-Agent Oversight
+                <button 
+                  onClick={() => setIsInfoOpen(true)}
+                  className="text-cp-accent-primary hover:text-cp-text-primary hover:bg-cp-bg-surface-raised px-2 py-0.5 border border-cp-accent-primary/30 hover:border-cp-accent-primary transition-all rounded-sm flex items-center gap-1 uppercase tracking-wider"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                  Guide
+                </button>
               </p>
             </div>
           </div>
@@ -114,6 +124,7 @@ function DashboardContent() {
                 disabled={isLocating}
                 className="bg-cp-bg-surface border border-cp-border-subtle text-cp-text-primary px-3 py-1 font-mono text-xs outline-none focus:border-cp-text-secondary disabled:opacity-50"
               >
+                <option value="" disabled>Select a zone...</option>
                 <option value="Delhi">Delhi</option>
                 <option value="Mumbai">Mumbai</option>
                 <option value="Bangalore">Bangalore</option>
@@ -179,6 +190,8 @@ function DashboardContent() {
           <AgentTimeline zone={selectedZone} />
         </div>
       </div>
+      
+      <InfoModal isOpen={isInfoOpen} onClose={() => setIsInfoOpen(false)} />
     </main>
   );
 }

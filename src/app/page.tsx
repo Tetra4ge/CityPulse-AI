@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
-  const [selectedZone, setSelectedZone] = useState("Delhi");
+  const [selectedZone, setSelectedZone] = useState("");
   const [isLocating, setIsLocating] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [customCoords, setCustomCoords] = useState<{ lat: number, lng: number } | null>(null);
@@ -46,6 +46,7 @@ export default function Home() {
   };
 
   const handleZoneChange = async (newZone: string) => {
+    if (!newZone) return;
     setSelectedZone(newZone);
     setIsProcessing(true);
     
@@ -101,6 +102,7 @@ export default function Home() {
                       disabled={isProcessing}
                       className="w-full bg-cp-bg-base border border-cp-border-strong text-cp-text-primary pl-4 pr-12 h-12 font-mono uppercase outline-none focus:border-cp-text-muted hover:bg-cp-bg-surface-raised cursor-pointer transition-colors appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23a1a1aa%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_1rem_center] bg-[length:1em_1em] disabled:opacity-50"
                     >
+                      <option value="" disabled>Select a zone...</option>
                       <option value="Delhi">Delhi</option>
                       <option value="Mumbai">Mumbai</option>
                       <option value="Bangalore">Bangalore</option>

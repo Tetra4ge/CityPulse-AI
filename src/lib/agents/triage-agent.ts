@@ -210,7 +210,8 @@ export async function triage(zone: string): Promise<TriageOutput> {
   }
 
   // 3. Trigger DBSCAN clustering via Python GPU Service
-  const pythonUrl = "http://127.0.0.1:8000/triage";
+  const pythonUrl = `${process.env.NEXT_PUBLIC_GPU_SERVICE_URL || "http://127.0.0.1:8000"}/triage`;
+  const apiKey = process.env.GPU_SERVICE_API_KEY || "";
   let hotspotDetected = false;
   let clusterCount = 0;
   let computedOnGpu = false;
@@ -219,7 +220,10 @@ export async function triage(zone: string): Promise<TriageOutput> {
     try {
       const res = await fetch(pythonUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-api-key": apiKey
+        },
         body: JSON.stringify({
           zone,
           complaints: formattedComplaints,
